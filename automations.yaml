@@ -1,0 +1,1762 @@
+- id: '1782231961246'
+  alias: Dolgozó Klíma ventilátor atkapcsol
+  description: ''
+  triggers:
+  - trigger: time
+    at: '21:00:00'
+  conditions: []
+  actions:
+  - device_id: 099c0fd555f39425bd21e9a03bcacdb4
+    domain: climate
+    entity_id: 0ca061fba032a17cdc217fb332f30f51
+    type: set_hvac_mode
+    hvac_mode: fan_only
+  - type: turn_on
+    device_id: 099c0fd555f39425bd21e9a03bcacdb4
+    entity_id: 31ed15417e078e545e7819bb3363e001
+    domain: switch
+  mode: single
+- id: '1782232109717'
+  alias: Dolgozó Klíma Ki
+  description: ''
+  triggers:
+  - trigger: time
+    at: '21:05:00'
+  conditions: []
+  actions:
+  - device_id: 099c0fd555f39425bd21e9a03bcacdb4
+    domain: climate
+    entity_id: 0ca061fba032a17cdc217fb332f30f51
+    type: set_hvac_mode
+    hvac_mode: 'off'
+  mode: single
+- id: '1782747098688'
+  alias: Csobogo 1 KI 20.00
+  description: ''
+  triggers:
+  - trigger: time
+    at: '20:00:00'
+  conditions: []
+  actions:
+  - type: turn_off
+    device_id: bf95711369a6edfb06d50b04de9ec4fd
+    entity_id: 9408ec68db65eaf5b055005290c1f4d1
+    domain: switch
+  mode: single
+- id: '1782895192886'
+  alias: Csobogó töltés óránként 4.00-22.00
+  description: ''
+  triggers:
+  - trigger: time_pattern
+    minutes: '0'
+  conditions:
+  - condition: time
+    after: 04:00:00
+    before: '22:01:00'
+    weekday:
+    - mon
+    - tue
+    - wed
+    - thu
+    - fri
+    - sat
+    - sun
+  actions:
+  - type: turn_on
+    device_id: bf95711369a6edfb06d50b04de9ec4fd
+    entity_id: 9408ec68db65eaf5b055005290c1f4d1
+    domain: switch
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 30
+      milliseconds: 0
+  - type: turn_off
+    device_id: bf95711369a6edfb06d50b04de9ec4fd
+    entity_id: 9408ec68db65eaf5b055005290c1f4d1
+    domain: switch
+  mode: single
+- id: '1783760491385'
+  alias: Csobogo KI minden óra 2 percben
+  description: ''
+  triggers:
+  - trigger: time_pattern
+    minutes: '2'
+  conditions:
+  - condition: time
+    after: 00:00:00
+    before: '23:05:00'
+    weekday:
+    - mon
+    - tue
+    - wed
+    - thu
+    - fri
+    - sat
+    - sun
+  actions:
+  - type: turn_off
+    device_id: bf95711369a6edfb06d50b04de9ec4fd
+    entity_id: 9408ec68db65eaf5b055005290c1f4d1
+    domain: switch
+  mode: single
+- id: '1784058579688'
+  alias: Radar relé BE
+  description: Emberérzékelésre bekapcsol napnyugta után 1 órától napkeltéig.
+  triggers:
+  - type: occupied
+    device_id: 6fe4bec12744012a68ce883048a01d8f
+    entity_id: f787ac1c2d89f678ccbd0bafb1ed87db
+    domain: binary_sensor
+    trigger: device
+  - trigger: sun
+    event: sunset
+    offset: 00:01:00
+  conditions:
+  - condition: or
+    conditions:
+    - condition: sun
+      after: sunset
+      after_offset:
+        hours: 0
+        minutes: 1
+        seconds: 0
+    - condition: sun
+      before: sunrise
+  - type: is_occupied
+    condition: device
+    device_id: 6fe4bec12744012a68ce883048a01d8f
+    entity_id: f787ac1c2d89f678ccbd0bafb1ed87db
+    domain: binary_sensor
+  actions:
+  - action: switch.turn_on
+    metadata: {}
+    target:
+      entity_id: switch.terasz_lampa
+    data: {}
+  mode: single
+- id: '1784058655251'
+  alias: Radar relé KI
+  description: ''
+  triggers:
+  - type: not_occupied
+    device_id: 6fe4bec12744012a68ce883048a01d8f
+    entity_id: f787ac1c2d89f678ccbd0bafb1ed87db
+    domain: binary_sensor
+    trigger: device
+  conditions: []
+  actions:
+  - action: switch.turn_off
+    metadata: {}
+    target:
+      entity_id: switch.terasz_lampa
+    data: {}
+  mode: single
+- id: '1784203981811'
+  alias: Puffer 50°C felett BE medence szivattyú
+  description: ''
+  triggers:
+  - type: temperature
+    device_id: 0727c08afbf74da2a66b54d7e465d7be
+    entity_id: 5f983fd511389569f22ba5d477483c8d
+    domain: sensor
+    trigger: device
+    above: 50
+  conditions: []
+  actions:
+  - type: turn_on
+    device_id: 04a7c7ff0d462239f263b19349750dff
+    entity_id: 9bb8e87f296d18ecbf6d72a77fc347e5
+    domain: switch
+  mode: single
+- id: '1784204125903'
+  alias: 'Puffer 45°C alatt KI medence szivattyú '
+  description: ''
+  triggers:
+  - type: temperature
+    device_id: 0727c08afbf74da2a66b54d7e465d7be
+    entity_id: 5f983fd511389569f22ba5d477483c8d
+    domain: sensor
+    trigger: device
+    below: 45
+  conditions: []
+  actions:
+  - type: turn_off
+    device_id: 04a7c7ff0d462239f263b19349750dff
+    entity_id: 9bb8e87f296d18ecbf6d72a77fc347e5
+    domain: switch
+  mode: single
+- id: '1785700000069'
+  alias: 'Radar ki minden órában '
+  description: ''
+  triggers:
+  - trigger: time_pattern
+    minutes: '0'
+  conditions: []
+  actions:
+  - action: switch.turn_off
+    metadata: {}
+    target:
+      device_id: 657f23a4f723293310a0b3c0042fe1db
+    data: {}
+  mode: single
+- id: '1787345219473'
+  alias: 'Fürdő Radiátor visszajelző '
+  description: ''
+  triggers:
+  - trigger: switch.turned_on
+    target:
+      device_id: 2f3824d09d9669be4961c7f28a5a72e3
+    options:
+      behavior: each
+  conditions: []
+  actions:
+  - action: switch.turn_on
+    metadata: {}
+    target:
+      device_id: 384a0f14be709aca1ab9c14852d36ba8
+    data: {}
+  mode: single
+- id: '1787345308700'
+  alias: Fürdő Radiátor visszajelző KI
+  description: ''
+  triggers:
+  - trigger: switch.turned_off
+    target:
+      device_id: 2f3824d09d9669be4961c7f28a5a72e3
+    options:
+      behavior: each
+  conditions: []
+  actions:
+  - action: switch.turn_off
+    metadata: {}
+    target:
+      device_id: 384a0f14be709aca1ab9c14852d36ba8
+    data: {}
+  mode: single
+- id: '1789400000001'
+  alias: Padlófűtés földszint automatikus szabályozás (prediktív, rev.4)
+  description: 'Rev.4: 4 zóna, percenkénti futás IF/ELSE zónaágakkal — egy zóna futó
+    ablak-timere NEM állítja le a többi zóna feldolgozását (stop elhagyva). Prediktív
+    zárás: ha a tanult küszöb aktív, a szelep a célhőfok ELŐTT zár (utánmelegedés-kompenzáció);
+    a +0,2 hiszterézis biztonsági biztosíték. Ablak-timer alatt a szelep ZÁRVA marad
+    (10 perc).'
+  triggers:
+  - trigger: time_pattern
+    minutes: /1
+    id: percenkenti
+  - trigger: homeassistant
+    event: start
+    id: ha_start
+  - trigger: time
+    at: '21:00:00'
+    id: ejszaka_start
+  - trigger: time
+    at: 06:00:00
+    id: nappal_start
+  - trigger: event
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.padlofutes_ablak_konyha
+    id: ablak_konyha_vege
+  - trigger: event
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.padlofutes_ablak_haloszoba
+    id: ablak_haloszoba_vege
+  - trigger: event
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.padlofutes_ablak_furdoszoba
+    id: ablak_furdoszoba_vege
+  - trigger: event
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.padlofutes_ablak_nappali
+    id: ablak_nappali_vege
+  conditions: []
+  actions:
+  - variables:
+      ejszaka: '{{ now().hour >= 21 or now().hour < 6 }}'
+      ejszaka_percek: "{% if now().hour >= 21 %}\n  {{ (now().hour - 21) * 60 + now().minute
+        }}\n{% else %}\n  {{ (now().hour + 3) * 60 + now().minute }}\n{% endif %}"
+      ejszaka_lepes: '{{ ((ejszaka_percek | int) // 30) * 0.5 }}'
+      cel_konyha: '{{ 21 if not ejszaka else [18, 21 - (ejszaka_lepes | float)] |
+        max }}'
+      cel_haloszoba: '{{ 22 if not ejszaka else [19, 22 - (ejszaka_lepes | float)]
+        | max }}'
+      cel_furdoszoba: '{{ 23 if not ejszaka else [19, 23 - (ejszaka_lepes | float)]
+        | max }}'
+      cel_nappali: '{{ 22 if not ejszaka else [19, 22 - (ejszaka_lepes | float)] |
+        max }}'
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: ablak_konyha_vege
+      sequence:
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.padlofutes_elotte_konyha
+        data:
+          value: '{{ states(''sensor.foldszint_konyha_homero_temperature'') | float(0)
+            if is_number(states(''sensor.foldszint_konyha_homero_temperature'')) else
+            0 }}'
+    - conditions:
+      - condition: trigger
+        id: ablak_haloszoba_vege
+      sequence:
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.padlofutes_elotte_haloszoba
+        data:
+          value: '{{ states(''sensor.foldszint_haloszoba_homero_temperature'') | float(0)
+            if is_number(states(''sensor.foldszint_haloszoba_homero_temperature''))
+            else 0 }}'
+    - conditions:
+      - condition: trigger
+        id: ablak_furdoszoba_vege
+      sequence:
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.padlofutes_elotte_furdoszoba
+        data:
+          value: '{{ states(''sensor.foldszint_furdoszoba_homero_temperature'') |
+            float(0) if is_number(states(''sensor.foldszint_furdoszoba_homero_temperature''))
+            else 0 }}'
+    - conditions:
+      - condition: trigger
+        id: ablak_nappali_vege
+      sequence:
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.padlofutes_elotte_nappali
+        data:
+          value: '{{ states(''sensor.foldszint_nappali_homero_temperature'') | float(0)
+            if is_number(states(''sensor.foldszint_nappali_homero_temperature''))
+            else 0 }}'
+    - conditions:
+      - condition: trigger
+        id:
+        - ejszaka_start
+        - nappal_start
+      sequence:
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.padlofutes_elotte_konyha
+        data:
+          value: '{{ states(''sensor.foldszint_konyha_homero_temperature'') | float(0)
+            if is_number(states(''sensor.foldszint_konyha_homero_temperature'')) else
+            0 }}'
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.padlofutes_elotte_haloszoba
+        data:
+          value: '{{ states(''sensor.foldszint_haloszoba_homero_temperature'') | float(0)
+            if is_number(states(''sensor.foldszint_haloszoba_homero_temperature''))
+            else 0 }}'
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.padlofutes_elotte_furdoszoba
+        data:
+          value: '{{ states(''sensor.foldszint_furdoszoba_homero_temperature'') |
+            float(0) if is_number(states(''sensor.foldszint_furdoszoba_homero_temperature''))
+            else 0 }}'
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.padlofutes_elotte_nappali
+        data:
+          value: '{{ states(''sensor.foldszint_nappali_homero_temperature'') | float(0)
+            if is_number(states(''sensor.foldszint_nappali_homero_temperature''))
+            else 0 }}'
+  - if:
+    - condition: template
+      value_template: '{{ states(''switch.padlofutes_szivattyu_mukodes_jelzo'') !=
+        ''on'' }}'
+    then:
+    - action: switch.turn_off
+      target:
+        entity_id:
+        - switch.padlofutes_foldszint_l1
+        - switch.padlofutes_foldszint_l2
+        - switch.padlofutes_foldszint_l3
+        - switch.padlofutes_foldszint_l4
+    - stop: Szivattyú nem ON – minden szelep NYITVA, fűtési zónavezérlés leáll
+    else: []
+  - repeat:
+      for_each:
+      - zone: konyha
+        switch_entity: switch.padlofutes_foldszint_l1
+        temp_entity: sensor.foldszint_konyha_homero_temperature
+        baseline_entity: input_number.padlofutes_elotte_konyha
+        ablakZaszo_entity: input_boolean.padlofutes_ablak_ciklus_konyha
+        timer_entity: timer.padlofutes_ablak_konyha
+        kuszob_entity: input_number.padlofutes_kuszob_konyha
+        predAktiv_entity: input_boolean.padlofutes_prediktiv_konyha
+        tanult_entity: input_number.padlofutes_rise_konyha
+      - zone: haloszoba
+        switch_entity: switch.padlofutes_foldszint_l2
+        temp_entity: sensor.foldszint_haloszoba_homero_temperature
+        baseline_entity: input_number.padlofutes_elotte_haloszoba
+        ablakZaszo_entity: input_boolean.padlofutes_ablak_ciklus_haloszoba
+        timer_entity: timer.padlofutes_ablak_haloszoba
+        kuszob_entity: input_number.padlofutes_kuszob_haloszoba
+        predAktiv_entity: input_boolean.padlofutes_prediktiv_haloszoba
+        tanult_entity: input_number.padlofutes_rise_haloszoba
+      - zone: furdoszoba
+        switch_entity: switch.padlofutes_foldszint_l3
+        temp_entity: sensor.foldszint_furdoszoba_homero_temperature
+        baseline_entity: input_number.padlofutes_elotte_furdoszoba
+        ablakZaszo_entity: input_boolean.padlofutes_ablak_ciklus_furdoszoba
+        timer_entity: timer.padlofutes_ablak_furdoszoba
+        kuszob_entity: input_number.padlofutes_kuszob_furdoszoba
+        predAktiv_entity: input_boolean.padlofutes_prediktiv_furdoszoba
+        tanult_entity: input_number.padlofutes_rise_furdoszoba
+      - zone: nappali
+        switch_entity: switch.padlofutes_foldszint_l4
+        temp_entity: sensor.foldszint_nappali_homero_temperature
+        baseline_entity: input_number.padlofutes_elotte_nappali
+        ablakZaszo_entity: input_boolean.padlofutes_ablak_ciklus_nappali
+        timer_entity: timer.padlofutes_ablak_nappali
+        kuszob_entity: input_number.padlofutes_kuszob_nappali
+        predAktiv_entity: input_boolean.padlofutes_prediktiv_nappali
+        tanult_entity: input_number.padlofutes_rise_nappali
+      sequence:
+      - variables:
+          temp: '{{ states(repeat.item.temp_entity) | float(0) }}'
+          temp_ok: '{{ is_number(states(repeat.item.temp_entity)) }}'
+          baseline: '{{ states(repeat.item.baseline_entity) | float(0) }}'
+          predAktiv: '{{ is_state(repeat.item.predAktiv_entity, ''on'') }}'
+          kuszob: '{{ states(repeat.item.kuszob_entity) | float(0) }}'
+          tanult: '{{ states(repeat.item.tanult_entity) | float(0) }}'
+          predLehetseges: '{{ predAktiv and tanult > 0.0 and kuszob > 0.15 }}'
+          cel: "{% set c = {\n  'konyha': cel_konyha,\n  'haloszoba': cel_haloszoba,\n
+            \ 'furdoszoba': cel_furdoszoba,\n  'nappali': cel_nappali\n} %} {{ c[repeat.item.zone]
+            | float(0) }}"
+      - if:
+        - condition: template
+          value_template: '{{ is_state(repeat.item.timer_entity, ''active'') }}'
+        then:
+        - if:
+          - condition: template
+            value_template: '{{ temp_ok and temp >= baseline + 0.15 }}'
+          then:
+          - action: input_number.set_value
+            target:
+              entity_id: '{{ repeat.item.baseline_entity }}'
+            data:
+              value: '{{ temp }}'
+        else:
+        - choose:
+          - conditions:
+            - condition: template
+              value_template: '{{ not temp_ok }}'
+            sequence:
+            - action: switch.turn_on
+              target:
+                entity_id: '{{ repeat.item.switch_entity }}'
+            - action: input_number.set_value
+              target:
+                entity_id: '{{ repeat.item.baseline_entity }}'
+              data:
+                value: 0
+          - conditions:
+            - condition: template
+              value_template: '{{ baseline == 0 }}'
+            sequence:
+            - action: input_number.set_value
+              target:
+                entity_id: '{{ repeat.item.baseline_entity }}'
+              data:
+                value: '{{ temp }}'
+          - conditions:
+            - condition: template
+              value_template: '{{ not is_state(repeat.item.timer_entity, ''active'')
+                and temp <= baseline - 1.0 }}'
+            sequence:
+            - action: switch.turn_on
+              target:
+                entity_id: '{{ repeat.item.switch_entity }}'
+            - action: timer.start
+              target:
+                entity_id: '{{ repeat.item.timer_entity }}'
+              data:
+                duration: 00:10:00
+            - action: input_boolean.turn_on
+              target:
+                entity_id: '{{ repeat.item.ablakZaszo_entity }}'
+          - conditions:
+            - condition: template
+              value_template: '{{ not is_state(repeat.item.timer_entity, ''active'')
+                and predLehetseges and is_state(repeat.item.switch_entity, ''off'')
+                and temp >= kuszob }}'
+            sequence:
+            - action: switch.turn_on
+              target:
+                entity_id: '{{ repeat.item.switch_entity }}'
+          - conditions:
+            - condition: template
+              value_template: '{{ not is_state(repeat.item.timer_entity, ''active'')
+                and temp > cel + 0.2 }}'
+            sequence:
+            - action: switch.turn_on
+              target:
+                entity_id: '{{ repeat.item.switch_entity }}'
+          - conditions:
+            - condition: template
+              value_template: '{{ not is_state(repeat.item.timer_entity, ''active'')
+                and temp < cel - 0.2 }}'
+            sequence:
+            - action: switch.turn_off
+              target:
+                entity_id: '{{ repeat.item.switch_entity }}'
+        - if:
+          - condition: template
+            value_template: '{{ temp_ok and not is_state(repeat.item.timer_entity,
+              ''active'') and temp >= baseline + 0.15 }}'
+          then:
+          - action: input_number.set_value
+            target:
+              entity_id: '{{ repeat.item.baseline_entity }}'
+            data:
+              value: '{{ temp }}'
+  mode: queued
+  max: 10
+- id: '1789400000002'
+  alias: Padlófűtés emelet automatikus szabályozás
+  description: 'Emelet, 4 zóna (dolgozó/fürdő/háló/nappali), nappali (06-19) / éjszakai
+    (19-06) célok, ablaknyitás-felismerés. Szeleplogika (inverz): switch ON = szelep
+    ZÁR (fűtés KI), switch OFF = szelep NYIT (fűtés BE). Baseline: percenként követi
+    a lassú (>=0,15 C/perc) mozgást, gyors esésnél fagy -> kumulatív -1 C = ablak.'
+  triggers:
+  - trigger: time_pattern
+    minutes: /1
+    id: ot_perc
+  - trigger: homeassistant
+    event: start
+    id: ha_start
+  - trigger: time
+    at: '19:00:00'
+    id: ejszaka_start
+  - trigger: time
+    at: 06:00:00
+    id: nappal_start
+  - trigger: event
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.padlofutes_ablak_dolgozo_emelet
+    id: ablak_dolgozo_vege
+  - trigger: event
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.padlofutes_ablak_furdoszoba_emelet
+    id: ablak_furdoszoba_vege
+  - trigger: event
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.padlofutes_ablak_haloszoba_emelet
+    id: ablak_haloszoba_vege
+  - trigger: event
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.padlofutes_ablak_nappali_emelet
+    id: ablak_nappali_vege
+  conditions: []
+  actions:
+  - variables:
+      ejszaka: '{{ now().hour >= 19 or now().hour < 6 }}'
+      ejszaka_percek: "{% if now().hour >= 19 %}\n  {{ (now().hour - 19) * 60 + now().minute
+        }}\n{% else %}\n  {{ (now().hour + 5) * 60 + now().minute }}\n{% endif %}"
+      ejszaka_lepes: '{{ ((ejszaka_percek | int) // 30) * 0.5 }}'
+      cel_dolgozo: '{{ 22.5 if not ejszaka else [15, 22.5 - (ejszaka_lepes | float)]
+        | max }}'
+      cel_furdoszoba: '{{ 15 if not ejszaka else [10, 15 - (ejszaka_lepes | float)]
+        | max }}'
+      cel_haloszoba: '{{ 15 if not ejszaka else [10, 15 - (ejszaka_lepes | float)]
+        | max }}'
+      cel_nappali: '{{ 15 if not ejszaka else [10, 15 - (ejszaka_lepes | float)] |
+        max }}'
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: ablak_dolgozo_vege
+      sequence:
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.padlofutes_elotte_dolgozo_emelet
+        data:
+          value: "{% if is_number(states('sensor.dolgozo_emelet_homero_temperature'))
+            %}\n  {{ states('sensor.dolgozo_emelet_homero_temperature') | float }}\n{%
+            else %}\n  0\n{% endif %}"
+    - conditions:
+      - condition: trigger
+        id: ablak_furdoszoba_vege
+      sequence:
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.padlofutes_elotte_furdoszoba_emelet
+        data:
+          value: "{% if is_number(states('sensor.furdoszoba_emelet_homero_temperature'))
+            %}\n  {{ states('sensor.furdoszoba_emelet_homero_temperature') | float
+            }}\n{% else %}\n  0\n{% endif %}"
+    - conditions:
+      - condition: trigger
+        id: ablak_haloszoba_vege
+      sequence:
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.padlofutes_elotte_haloszoba_emelet
+        data:
+          value: "{% if is_number(states('sensor.haloszoba_emelet_homero_temperature'))
+            %}\n  {{ states('sensor.haloszoba_emelet_homero_temperature') | float
+            }}\n{% else %}\n  0\n{% endif %}"
+    - conditions:
+      - condition: trigger
+        id: ablak_nappali_vege
+      sequence:
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.padlofutes_elotte_nappali_emelet
+        data:
+          value: "{% if is_number(states('sensor.nappali_emelet_homero_temperature'))
+            %}\n  {{ states('sensor.nappali_emelet_homero_temperature') | float }}\n{%
+            else %}\n  0\n{% endif %}"
+    - conditions:
+      - condition: trigger
+        id:
+        - ejszaka_start
+        - nappal_start
+      sequence:
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.padlofutes_elotte_dolgozo_emelet
+        data:
+          value: "{% if is_number(states('sensor.dolgozo_emelet_homero_temperature'))
+            %}\n  {{ states('sensor.dolgozo_emelet_homero_temperature') | float }}\n{%
+            else %}\n  0\n{% endif %}"
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.padlofutes_elotte_furdoszoba_emelet
+        data:
+          value: "{% if is_number(states('sensor.furdoszoba_emelet_homero_temperature'))
+            %}\n  {{ states('sensor.furdoszoba_emelet_homero_temperature') | float
+            }}\n{% else %}\n  0\n{% endif %}"
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.padlofutes_elotte_haloszoba_emelet
+        data:
+          value: "{% if is_number(states('sensor.haloszoba_emelet_homero_temperature'))
+            %}\n  {{ states('sensor.haloszoba_emelet_homero_temperature') | float
+            }}\n{% else %}\n  0\n{% endif %}"
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.padlofutes_elotte_nappali_emelet
+        data:
+          value: "{% if is_number(states('sensor.nappali_emelet_homero_temperature'))
+            %}\n  {{ states('sensor.nappali_emelet_homero_temperature') | float }}\n{%
+            else %}\n  0\n{% endif %}"
+  - if:
+    - condition: template
+      value_template: '{{ states(''switch.padlofutes_szivattyu_mukodes_jelzo'') !=
+        ''on'' }}'
+    then:
+    - action: switch.turn_off
+      target:
+        entity_id:
+        - switch.padlofutes_emelet_l1
+        - switch.padlofutes_emelet_l2
+        - switch.padlofutes_emelet_l3
+        - switch.padlofutes_emelet_l4
+    - stop: Szivattyú nem ON – minden szelep NYITVA, fűtési zónavezérlés leáll
+  - repeat:
+      for_each:
+      - zone: dolgozo
+        switch_entity: switch.padlofutes_emelet_l2
+        temp_entity: sensor.dolgozo_emelet_homero_temperature
+        baseline_entity: input_number.padlofutes_elotte_dolgozo_emelet
+        timer_entity: timer.padlofutes_ablak_dolgozo_emelet
+      - zone: furdoszoba
+        switch_entity: switch.padlofutes_emelet_l1
+        temp_entity: sensor.furdoszoba_emelet_homero_temperature
+        baseline_entity: input_number.padlofutes_elotte_furdoszoba_emelet
+        timer_entity: timer.padlofutes_ablak_furdoszoba_emelet
+      - zone: haloszoba
+        switch_entity: switch.padlofutes_emelet_l3
+        temp_entity: sensor.haloszoba_emelet_homero_temperature
+        baseline_entity: input_number.padlofutes_elotte_haloszoba_emelet
+        timer_entity: timer.padlofutes_ablak_haloszoba_emelet
+      - zone: nappali
+        switch_entity: switch.padlofutes_emelet_l4
+        temp_entity: sensor.nappali_emelet_homero_temperature
+        baseline_entity: input_number.padlofutes_elotte_nappali_emelet
+        timer_entity: timer.padlofutes_ablak_nappali_emelet
+      sequence:
+      - variables:
+          temp: '{{ states(repeat.item.temp_entity) | float(0) }}'
+          temp_ok: '{{ is_number(states(repeat.item.temp_entity)) }}'
+          baseline: '{{ states(repeat.item.baseline_entity) | float(0) }}'
+          timer_idle: '{{ is_state(repeat.item.timer_entity, ''idle'') }}'
+          cel: "{% set c = {\n  'dolgozo': cel_dolgozo,\n  'furdoszoba': cel_furdoszoba,\n
+            \ 'haloszoba': cel_haloszoba,\n  'nappali': cel_nappali\n} %} {{ c[repeat.item.zone]
+            | float(0) }}"
+      - choose:
+        - conditions:
+          - condition: template
+            value_template: '{{ not temp_ok }}'
+          sequence:
+          - action: switch.turn_on
+            target:
+              entity_id: '{{ repeat.item.switch_entity }}'
+          - action: input_number.set_value
+            target:
+              entity_id: '{{ repeat.item.baseline_entity }}'
+            data:
+              value: 0
+        - conditions:
+          - condition: template
+            value_template: '{{ baseline == 0 and timer_idle }}'
+          sequence:
+          - action: input_number.set_value
+            target:
+              entity_id: '{{ repeat.item.baseline_entity }}'
+            data:
+              value: '{{ temp }}'
+        - conditions:
+          - condition: template
+            value_template: '{{ timer_idle and temp <= baseline - 1.0 }}'
+          sequence:
+          - action: switch.turn_on
+            target:
+              entity_id: '{{ repeat.item.switch_entity }}'
+          - action: timer.start
+            target:
+              entity_id: '{{ repeat.item.timer_entity }}'
+            data:
+              duration: 00:10:00
+        - conditions:
+          - condition: template
+            value_template: '{{ timer_idle and temp > cel + 0.2 }}'
+          sequence:
+          - action: switch.turn_on
+            target:
+              entity_id: '{{ repeat.item.switch_entity }}'
+        - conditions:
+          - condition: template
+            value_template: '{{ timer_idle and temp < cel - 0.2 }}'
+          sequence:
+          - action: switch.turn_off
+            target:
+              entity_id: '{{ repeat.item.switch_entity }}'
+      - if:
+        - condition: template
+          value_template: "{{ temp_ok and is_state(repeat.item.timer_entity, 'idle')\n
+            \ and temp >= baseline - 0.15 }}"
+        then:
+        - action: input_number.set_value
+          target:
+            entity_id: '{{ repeat.item.baseline_entity }}'
+          data:
+            value: '{{ temp }}'
+  mode: queued
+  max: 10
+- id: '1789400000003'
+  alias: Kazán padlófűtés puffer szabályozás (40/38 °C, 06-22 óra)
+  description: 'Amíg engedélyezett, 06:00-22:00 között: fűtés BE (heat_cool, 22,5
+    °C), ha puffer VAGY tartály >40 °C, és legalább az egyik szobahőmérő <22 °C. Fűtés
+    KI (cél 18 °C), ha mindkét elérhető puffer/tartály <38 °C (egyik elérhetetlen,
+    a másik <38 °C is elég), VAGY bármelyik kültéri >23 °C, VAGY a szobahőmérséklet
+    mindkét elérhető érzékelője >=22,5 °C, VAGY mindkét puffer/tartály érzékelő elérhetetlen
+    (fail-safe KI). Egy szobaérzékelő kiesésekor a másik egyedül vezérel; ha mindkettő
+    kiesik, a fűtés KI. 22-22,5 °C között az állapot nem változik (hiszterézis). 22:00-06:00
+    között fűtés KI kényszerítve. Nyugalmi állapotban 0 szolgáltatáshívás.'
+  triggers:
+  - trigger: state
+    entity_id: sensor.homero_puffer_external_temperature
+  - trigger: state
+    entity_id: sensor.futes_melegviz_tank_temperature
+  - trigger: state
+    entity_id: sensor.terasz_homero_emelet_temperature
+  - trigger: state
+    entity_id: sensor.kinti_foldszint_homero_temperature
+  - trigger: state
+    entity_id: sensor.futes_vaillant_vr921_outdoor_temperature
+  - trigger: state
+    entity_id: sensor.foldszint_nappali_homero_temperature
+  - trigger: state
+    entity_id: sensor.futes_padlofutes_circuit_0_current_temperature
+  - trigger: time_pattern
+    minutes: /1
+  conditions: []
+  actions:
+  - variables:
+      futesi_ido: '{{ now().hour >= 6 and now().hour < 22 }}'
+      climate_ok: '{{ has_value(''climate.futes_padlofutes_circuit_0_climate'') }}'
+      aktualis_mod: '{{ states(''climate.futes_padlofutes_circuit_0_climate'') }}'
+      aktualis_cel: '{{ states(''sensor.futes_padlofutes_circuit_0_desired_heating_temperature'')
+        | float(-999) if is_number(states(''sensor.futes_padlofutes_circuit_0_desired_heating_temperature''))
+        else state_attr(''climate.futes_padlofutes_circuit_0_climate'', ''temperature'')
+        | float(-999) }}'
+      pu: '{{ states(''sensor.homero_puffer_external_temperature'') | float(0) }}'
+      ta: '{{ states(''sensor.futes_melegviz_tank_temperature'') | float(0) }}'
+      na: '{{ states(''sensor.foldszint_nappali_homero_temperature'') | float(0) }}'
+      ci: '{{ states(''sensor.futes_padlofutes_circuit_0_current_temperature'') |
+        float(0) }}'
+      pu_ok: '{{ is_number(states(''sensor.homero_puffer_external_temperature''))
+        }}'
+      ta_ok: '{{ is_number(states(''sensor.futes_melegviz_tank_temperature'')) }}'
+      na_ok: '{{ is_number(states(''sensor.foldszint_nappali_homero_temperature''))
+        }}'
+      ci_ok: '{{ is_number(states(''sensor.futes_padlofutes_circuit_0_current_temperature''))
+        }}'
+      puffer_be: '{{ (pu_ok and pu > 40) or (ta_ok and ta > 40) }}'
+      puffer_ki: "{{ (pu_ok and ta_ok and pu < 38 and ta < 38)\n   or (pu_ok and not
+        ta_ok and pu < 38)\n   or (ta_ok and not pu_ok and ta < 38) }}"
+      puffer_nincs: '{{ not pu_ok and not ta_ok }}'
+      kinti_stop: "{{ (is_number(states('sensor.terasz_homero_emelet_temperature'))\n
+        \   and states('sensor.terasz_homero_emelet_temperature') | float > 23)\n
+        \  or (is_number(states('sensor.kinti_foldszint_homero_temperature'))\n    and
+        states('sensor.kinti_foldszint_homero_temperature') | float > 23)\n   or (is_number(states('sensor.futes_vaillant_vr921_outdoor_temperature'))\n
+        \   and states('sensor.futes_vaillant_vr921_outdoor_temperature') | float
+        > 23) }}"
+      igeny_indit: '{{ (na_ok and na < 22.3) or (ci_ok and ci < 22.3) }}'
+      igeny_stop: "{{ (na_ok and ci_ok and na >= 22.5 and ci >= 22.5)\n   or (na_ok
+        and not ci_ok and na >= 22.5)\n   or (ci_ok and not na_ok and ci >= 22.5)
+        }}"
+      szoba_nincs: '{{ not na_ok and not ci_ok }}'
+      leall: '{{ puffer_ki or kinti_stop or igeny_stop or szoba_nincs or puffer_nincs
+        }}'
+      indulhat: '{{ puffer_be and not leall and igeny_indit }}'
+  - condition: template
+    value_template: '{{ climate_ok }}'
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ not futesi_ido }}'
+      sequence:
+      - if:
+        - condition: template
+          value_template: '{{ aktualis_mod != ''off'' }}'
+        then:
+        - action: climate.set_hvac_mode
+          target:
+            entity_id: climate.futes_padlofutes_circuit_0_climate
+          data:
+            hvac_mode: 'off'
+    - conditions:
+      - condition: template
+        value_template: '{{ futesi_ido and leall }}'
+      sequence:
+      - if:
+        - condition: template
+          value_template: '{{ aktualis_mod != ''off'' and aktualis_cel != -999 and
+            aktualis_cel != 18 }}'
+        then:
+        - action: climate.set_temperature
+          target:
+            entity_id: climate.futes_padlofutes_circuit_0_climate
+          data:
+            temperature: 18
+      - if:
+        - condition: template
+          value_template: '{{ aktualis_mod != ''off'' }}'
+        then:
+        - action: climate.set_hvac_mode
+          target:
+            entity_id: climate.futes_padlofutes_circuit_0_climate
+          data:
+            hvac_mode: 'off'
+    - conditions:
+      - condition: template
+        value_template: '{{ futesi_ido and indulhat }}'
+      sequence:
+      - if:
+        - condition: template
+          value_template: '{{ aktualis_mod != ''heat_cool'' and aktualis_cel != -999
+            }}'
+        then:
+        - action: climate.set_hvac_mode
+          target:
+            entity_id: climate.futes_padlofutes_circuit_0_climate
+          data:
+            hvac_mode: heat_cool
+      - if:
+        - condition: template
+          value_template: '{{ aktualis_cel != -999 and (aktualis_mod != ''heat_cool''
+            or aktualis_cel != 22.5) }}'
+        then:
+        - action: climate.set_temperature
+          target:
+            entity_id: climate.futes_padlofutes_circuit_0_climate
+          data:
+            temperature: 22.5
+  mode: single
+- id: '1789400000004'
+  alias: Fűtés vezérlés 3 - érzékelő hiba riasztás
+  description: 'Riasztás, ha a fűtésvezérlés bármelyik entitása nem áll rendelkezésre
+    (unavailable vagy unknown). Figyelt: 15 hőmérséklet-szenzor (7 kazán + 8 zónahőmérő),
+    8 szelepkapcsoló (földszint L1-L4, emelet L1-L4), a szivattyújelző switch és a
+    kazán climate entitás. A szelepek on/off és a climate off/heat_cool állapota NORMÁLIS
+    (inverz szeleplogika), csak az elérhetetlenség riaszt. HA-indulás/újratöltés után
+    2 percet vár, majd átvizsgálja mindet - az induláskor már eleve hibás entitásokról
+    is értesít. Élő állapotváltásra is riaszt (2 perces ellenőrzéssel, hogy átmeneti
+    imbolygást ne jelezzen).'
+  triggers:
+  - trigger: homeassistant
+    event: start
+  - trigger: event
+    event_type: automation_reloaded
+  - trigger: state
+    entity_id:
+    - sensor.homero_puffer_external_temperature
+    - sensor.futes_melegviz_tank_temperature
+    - sensor.terasz_homero_emelet_temperature
+    - sensor.kinti_foldszint_homero_temperature
+    - sensor.futes_vaillant_vr921_outdoor_temperature
+    - sensor.futes_padlofutes_circuit_0_current_temperature
+    - sensor.futes_padlofutes_circuit_0_desired_heating_temperature
+    - sensor.foldszint_konyha_homero_temperature
+    - sensor.foldszint_haloszoba_homero_temperature
+    - sensor.foldszint_furdoszoba_homero_temperature
+    - sensor.foldszint_nappali_homero_temperature
+    - sensor.dolgozo_emelet_homero_temperature
+    - sensor.furdoszoba_emelet_homero_temperature
+    - sensor.haloszoba_emelet_homero_temperature
+    - sensor.nappali_emelet_homero_temperature
+    - switch.padlofutes_szivattyu_mukodes_jelzo
+    - switch.padlofutes_foldszint_l1
+    - switch.padlofutes_foldszint_l2
+    - switch.padlofutes_foldszint_l3
+    - switch.padlofutes_foldszint_l4
+    - switch.padlofutes_emelet_l1
+    - switch.padlofutes_emelet_l2
+    - switch.padlofutes_emelet_l3
+    - switch.padlofutes_emelet_l4
+    - climate.futes_padlofutes_circuit_0_climate
+    to: unavailable
+  - trigger: state
+    entity_id:
+    - sensor.homero_puffer_external_temperature
+    - sensor.futes_melegviz_tank_temperature
+    - sensor.terasz_homero_emelet_temperature
+    - sensor.kinti_foldszint_homero_temperature
+    - sensor.futes_vaillant_vr921_outdoor_temperature
+    - sensor.futes_padlofutes_circuit_0_current_temperature
+    - sensor.futes_padlofutes_circuit_0_desired_heating_temperature
+    - sensor.foldszint_konyha_homero_temperature
+    - sensor.foldszint_haloszoba_homero_temperature
+    - sensor.foldszint_furdoszoba_homero_temperature
+    - sensor.foldszint_nappali_homero_temperature
+    - sensor.dolgozo_emelet_homero_temperature
+    - sensor.furdoszoba_emelet_homero_temperature
+    - sensor.haloszoba_emelet_homero_temperature
+    - sensor.nappali_emelet_homero_temperature
+    - switch.padlofutes_szivattyu_mukodes_jelzo
+    - switch.padlofutes_foldszint_l1
+    - switch.padlofutes_foldszint_l2
+    - switch.padlofutes_foldszint_l3
+    - switch.padlofutes_foldszint_l4
+    - switch.padlofutes_emelet_l1
+    - switch.padlofutes_emelet_l2
+    - switch.padlofutes_emelet_l3
+    - switch.padlofutes_emelet_l4
+    - climate.futes_padlofutes_circuit_0_climate
+    to: unknown
+  conditions: []
+  actions:
+  - delay:
+      hours: 0
+      minutes: 2
+      seconds: 0
+      milliseconds: 0
+  - repeat:
+      for_each:
+      - sensor.homero_puffer_external_temperature
+      - sensor.futes_melegviz_tank_temperature
+      - sensor.terasz_homero_emelet_temperature
+      - sensor.kinti_foldszint_homero_temperature
+      - sensor.futes_vaillant_vr921_outdoor_temperature
+      - sensor.futes_padlofutes_circuit_0_current_temperature
+      - sensor.futes_padlofutes_circuit_0_desired_heating_temperature
+      - sensor.foldszint_konyha_homero_temperature
+      - sensor.foldszint_haloszoba_homero_temperature
+      - sensor.foldszint_furdoszoba_homero_temperature
+      - sensor.foldszint_nappali_homero_temperature
+      - sensor.dolgozo_emelet_homero_temperature
+      - sensor.furdoszoba_emelet_homero_temperature
+      - sensor.haloszoba_emelet_homero_temperature
+      - sensor.nappali_emelet_homero_temperature
+      - switch.padlofutes_szivattyu_mukodes_jelzo
+      - switch.padlofutes_foldszint_l1
+      - switch.padlofutes_foldszint_l2
+      - switch.padlofutes_foldszint_l3
+      - switch.padlofutes_foldszint_l4
+      - switch.padlofutes_emelet_l1
+      - switch.padlofutes_emelet_l2
+      - switch.padlofutes_emelet_l3
+      - switch.padlofutes_emelet_l4
+      - climate.futes_padlofutes_circuit_0_climate
+      sequence:
+      - variables:
+          ent: '{{ repeat.item }}'
+      - if:
+        - condition: template
+          value_template: '{{ not has_value(ent) }}'
+        then:
+        - action: persistent_notification.create
+          data:
+            title: FŰTÉS VEZÉRLÉS 3 - HIBA!
+            notification_id: '{{ ent }}'
+            message: '{{ state_attr(ent, ''friendly_name'') or ent }} nem áll rendelkezésre
+              ({{ states(ent) }}) - {{ ent }}'
+  mode: single
+- id: '1789400000005'
+  alias: Padlófűtés tanulás - ciklus észlelés (földszint)
+  description: 'Rev.4: szelepkapcsolásból (inverz logika: switch ON = szelep ZÁR =
+    fűtés KI; OFF = szelep NYIT = fűtés BE) fűtési ciklus észlelés. Hamis cikluskezdés
+    védve (szivattyú-ON ellenőrzés), ciklus közbeni esemény-zászlók (ablak / szivattyú),
+    mode: queued. Zárásnál érvényes- ség-szűrés az utólagos zászlók alapján, majd
+    utánmelegedés-megfigyelés elindítása (figyel flag). A tanult rise a 0007-ben frissül.'
+  triggers:
+  - trigger: state
+    entity_id:
+    - switch.padlofutes_foldszint_l1
+    - switch.padlofutes_foldszint_l2
+    - switch.padlofutes_foldszint_l3
+    - switch.padlofutes_foldszint_l4
+  - trigger: state
+    entity_id: switch.padlofutes_szivattyu_mukodes_jelzo
+    id: szivattyu_valt
+  conditions: []
+  actions:
+  - variables:
+      entityType: '{{ trigger.to_state.entity_id if trigger.to_state else '''' }}'
+      uj: '{{ trigger.to_state.state if trigger.to_state else ''unknown'' }}'
+      regi: '{{ trigger.from_state.state if trigger.from_state else ''unavailable''
+        }}'
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: szivattyu_valt
+      sequence:
+      - if:
+        - condition: template
+          value_template: '{{ not is_state(''switch.padlofutes_szivattyu_mukodes_jelzo'',
+            ''on'') }}'
+        then:
+        - action: input_boolean.turn_on
+          target:
+            entity_id:
+            - input_boolean.padlofutes_szivattyu_ciklus_konyha
+            - input_boolean.padlofutes_szivattyu_ciklus_haloszoba
+            - input_boolean.padlofutes_szivattyu_ciklus_furdoszoba
+            - input_boolean.padlofutes_szivattyu_ciklus_nappali
+    - conditions:
+      - condition: template
+        value_template: '{{ is_state(''switch.padlofutes_szivattyu_mukodes_jelzo'',
+          ''on'') and regi == ''on'' and uj == ''off'' }}'
+      sequence:
+      - variables:
+          zonaList:
+          - zona: konyha
+            sw: switch.padlofutes_foldszint_l1
+            temp: sensor.foldszint_konyha_homero_temperature
+            kezdetN: input_number.padlofutes_kezdet_konyha
+            kezdete: input_datetime.padlofutes_ido_konyha
+            figyelB: input_boolean.padlofutes_figyel_konyha
+            ablakZ: input_boolean.padlofutes_ablak_ciklus_konyha
+            szivZ: input_boolean.padlofutes_szivattyu_ciklus_konyha
+            tanulandoIdo: input_datetime.padlofutes_tanulando_ido_konyha
+            kintiN: input_number.padlofutes_kinti_konyha
+          - zona: haloszoba
+            sw: switch.padlofutes_foldszint_l2
+            temp: sensor.foldszint_haloszoba_homero_temperature
+            kezdetN: input_number.padlofutes_kezdet_haloszoba
+            kezdete: input_datetime.padlofutes_ido_haloszoba
+            figyelB: input_boolean.padlofutes_figyel_haloszoba
+            ablakZ: input_boolean.padlofutes_ablak_ciklus_haloszoba
+            szivZ: input_boolean.padlofutes_szivattyu_ciklus_haloszoba
+            tanulandoIdo: input_datetime.padlofutes_tanulando_ido_haloszoba
+            kintiN: input_number.padlofutes_kinti_haloszoba
+          - zona: furdoszoba
+            sw: switch.padlofutes_foldszint_l3
+            temp: sensor.foldszint_furdoszoba_homero_temperature
+            kezdetN: input_number.padlofutes_kezdet_furdoszoba
+            kezdete: input_datetime.padlofutes_ido_furdoszoba
+            figyelB: input_boolean.padlofutes_figyel_furdoszoba
+            ablakZ: input_boolean.padlofutes_ablak_ciklus_furdoszoba
+            szivZ: input_boolean.padlofutes_szivattyu_ciklus_furdoszoba
+            tanulandoIdo: input_datetime.padlofutes_tanulando_ido_furdoszoba
+            kintiN: input_number.padlofutes_kinti_furdoszoba
+          - zona: nappali
+            sw: switch.padlofutes_foldszint_l4
+            temp: sensor.foldszint_nappali_homero_temperature
+            kezdetN: input_number.padlofutes_kezdet_nappali
+            kezdete: input_datetime.padlofutes_ido_nappali
+            figyelB: input_boolean.padlofutes_figyel_nappali
+            ablakZ: input_boolean.padlofutes_ablak_ciklus_nappali
+            szivZ: input_boolean.padlofutes_szivattyu_ciklus_nappali
+            tanulandoIdo: input_datetime.padlofutes_tanulando_ido_nappali
+            kintiN: input_number.padlofutes_kinti_nappali
+          zona: '{% set l = (zonaList | selectattr(''sw'', ''equalto'', entityType)
+            | list) %} {{ l[0] if l | length > 0 else none }}'
+          tempOk: '{{ is_number(states(zona.temp)) if zona is not none else false
+            }}'
+      - if:
+        - condition: template
+          value_template: '{{ zona is not none and is_state(zona.figyelB, ''on'')
+            }}'
+        then:
+        - action: input_datetime.set_datetime
+          target:
+            entity_id: '{{ zona.tanulandoIdo }}'
+          data:
+            datetime: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}'
+      - if:
+        - condition: template
+          value_template: '{{ zona is not none }}'
+        then:
+        - action: input_number.set_value
+          target:
+            entity_id: '{{ zona.kezdetN }}'
+          data:
+            value: '{{ states(zona.temp) | float(0) if tempOk else 0 }}'
+        - action: input_datetime.set_datetime
+          target:
+            entity_id: '{{ zona.kezdete }}'
+          data:
+            datetime: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}'
+        - action: input_boolean.turn_off
+          target:
+            entity_id:
+            - '{{ zona.ablakZ }}'
+            - '{{ zona.szivZ }}'
+        - action: input_number.set_value
+          target:
+            entity_id: '{{ zona.kintiN }}'
+          data:
+            value: '{% set s1 = states(''sensor.terasz_homero_emelet_temperature'')
+              %} {% set s2 = states(''sensor.kinti_foldszint_homero_temperature'')
+              %} {% set s3 = states(''sensor.futes_vaillant_vr921_outdoor_temperature'')
+              %} {% set vals = [] %} {% if is_number(s1) %}{% set vals = vals + [s1
+              | float] %}{% endif %} {% if is_number(s2) %}{% set vals = vals + [s2
+              | float] %}{% endif %} {% if is_number(s3) %}{% set vals = vals + [s3
+              | float] %}{% endif %} {{ (vals | sum) / (vals | length) if vals | length
+              > 0 else 0 }}'
+    - conditions:
+      - condition: template
+        value_template: '{{ regi == ''off'' and uj == ''on'' }}'
+      sequence:
+      - variables:
+          zonaList:
+          - zona: konyha
+            sw: switch.padlofutes_foldszint_l1
+            temp: sensor.foldszint_konyha_homero_temperature
+            kezdetN: input_number.padlofutes_kezdet_konyha
+            kezdete: input_datetime.padlofutes_ido_konyha
+            leallN: input_number.padlofutes_leall_konyha
+            leallIdo: input_datetime.padlofutes_leall_ido_konyha
+            durN: input_number.padlofutes_dur_konyha
+            kintiN: input_number.padlofutes_kinti_konyha
+            pvN: input_number.padlofutes_pv_konyha
+            celN: input_number.padlofutes_cel_konyha
+            figyelB: input_boolean.padlofutes_figyel_konyha
+            maxN: input_number.padlofutes_max_konyha
+            maxI: input_datetime.padlofutes_max_ido_konyha
+            ablakZ: input_boolean.padlofutes_ablak_ciklus_konyha
+            szivZ: input_boolean.padlofutes_szivattyu_ciklus_konyha
+            napCel: 21.0
+            ejszCel: 18.0
+          - zona: haloszoba
+            sw: switch.padlofutes_foldszint_l2
+            temp: sensor.foldszint_haloszoba_homero_temperature
+            kezdetN: input_number.padlofutes_kezdet_haloszoba
+            kezdete: input_datetime.padlofutes_ido_haloszoba
+            leallN: input_number.padlofutes_leall_haloszoba
+            leallIdo: input_datetime.padlofutes_leall_ido_haloszoba
+            durN: input_number.padlofutes_dur_haloszoba
+            kintiN: input_number.padlofutes_kinti_haloszoba
+            pvN: input_number.padlofutes_pv_haloszoba
+            celN: input_number.padlofutes_cel_haloszoba
+            figyelB: input_boolean.padlofutes_figyel_haloszoba
+            maxN: input_number.padlofutes_max_haloszoba
+            maxI: input_datetime.padlofutes_max_ido_haloszoba
+            ablakZ: input_boolean.padlofutes_ablak_ciklus_haloszoba
+            szivZ: input_boolean.padlofutes_szivattyu_ciklus_haloszoba
+            napCel: 22.0
+            ejszCel: 19.0
+          - zona: furdoszoba
+            sw: switch.padlofutes_foldszint_l3
+            temp: sensor.foldszint_furdoszoba_homero_temperature
+            kezdetN: input_number.padlofutes_kezdet_furdoszoba
+            kezdete: input_datetime.padlofutes_ido_furdoszoba
+            leallN: input_number.padlofutes_leall_furdoszoba
+            leallIdo: input_datetime.padlofutes_leall_ido_furdoszoba
+            durN: input_number.padlofutes_dur_furdoszoba
+            kintiN: input_number.padlofutes_kinti_furdoszoba
+            pvN: input_number.padlofutes_pv_furdoszoba
+            celN: input_number.padlofutes_cel_furdoszoba
+            figyelB: input_boolean.padlofutes_figyel_furdoszoba
+            maxN: input_number.padlofutes_max_furdoszoba
+            maxI: input_datetime.padlofutes_max_ido_furdoszoba
+            ablakZ: input_boolean.padlofutes_ablak_ciklus_furdoszoba
+            szivZ: input_boolean.padlofutes_szivattyu_ciklus_furdoszoba
+            napCel: 23.0
+            ejszCel: 19.0
+          - zona: nappali
+            sw: switch.padlofutes_foldszint_l4
+            temp: sensor.foldszint_nappali_homero_temperature
+            kezdetN: input_number.padlofutes_kezdet_nappali
+            kezdete: input_datetime.padlofutes_ido_nappali
+            leallN: input_number.padlofutes_leall_nappali
+            leallIdo: input_datetime.padlofutes_leall_ido_nappali
+            durN: input_number.padlofutes_dur_nappali
+            kintiN: input_number.padlofutes_kinti_nappali
+            pvN: input_number.padlofutes_pv_nappali
+            celN: input_number.padlofutes_cel_nappali
+            figyelB: input_boolean.padlofutes_figyel_nappali
+            maxN: input_number.padlofutes_max_nappali
+            maxI: input_datetime.padlofutes_max_ido_nappali
+            ablakZ: input_boolean.padlofutes_ablak_ciklus_nappali
+            szivZ: input_boolean.padlofutes_szivattyu_ciklus_nappali
+            napCel: 22.0
+            ejszCel: 19.0
+          zona: '{% set l = (zonaList | selectattr(''sw'', ''equalto'', entityType)
+            | list) %} {{ l[0] if l | length > 0 else none }}'
+      - variables:
+          tempOk: '{{ is_number(states(zona.temp)) if zona is not none else false
+            }}'
+          temp: '{{ states(zona.temp) | float(0) if tempOk else -1 }}'
+          kezdet: '{{ states(zona.kezdetN) | float(0) if zona is not none else 0 }}'
+          kezdeteStr: '{{ states(zona.kezdete) if zona is not none else '''' }}'
+          rendben_kezd: '{{ kezdet > 0 and (as_timestamp(kezdeteStr) or 0) > 0 }}'
+          dur: '{{ ((as_timestamp(now()) - as_timestamp(kezdeteStr)) / 60) | round(0)
+            if rendben_kezd else 0 }}'
+          kinti: '{% set s1 = states(''sensor.terasz_homero_emelet_temperature'')
+            %} {% set s2 = states(''sensor.kinti_foldszint_homero_temperature'') %}
+            {% set s3 = states(''sensor.futes_vaillant_vr921_outdoor_temperature'')
+            %} {% set vals = [] %} {% if is_number(s1) %}{% set vals = vals + [s1
+            | float] %}{% endif %} {% if is_number(s2) %}{% set vals = vals + [s2
+            | float] %}{% endif %} {% if is_number(s3) %}{% set vals = vals + [s3
+            | float] %}{% endif %} {{ (vals | sum) / (vals | length) if vals | length
+            > 0 else 0 }}'
+          kinOk: '{{ is_number(states(''sensor.terasz_homero_emelet_temperature''))
+            or is_number(states(''sensor.kinti_foldszint_homero_temperature'')) or
+            is_number(states(''sensor.futes_vaillant_vr921_outdoor_temperature''))
+            }}'
+          pv: '{{ states(''sensor.solplanet_ht00306022230042_mppt_1_power'') | float(0)
+            if is_number(states(''sensor.solplanet_ht00306022230042_mppt_1_power''))
+            else 0 }}'
+          ejszaka: '{{ now().hour >= 21 or now().hour < 6 }}'
+          ejszakaPercek: "{% if now().hour >= 21 %}\n  {{ (now().hour - 21) * 60 +
+            now().minute }}\n{% else %}\n  {{ (now().hour + 3) * 60 + now().minute
+            }}\n{% endif %}"
+          ejszakaLepes: '{{ ((ejszakaPercek | int) // 30) * 0.5 }}'
+          celErtek: "{% if zona is not none and not ejszaka %}\n  {{ zona.napCel }}\n{%
+            elif zona is not none %}\n  {{ [zona.ejszCel, (zona.napCel - ejszakaLepes)
+            | float] | max }}\n{% else %}\n  0\n{% endif %}"
+          ablakVolt: '{{ is_state(zona.ablakZ, ''on'') if zona is not none else false
+            }}'
+          szivVolt: '{{ is_state(zona.szivZ, ''on'') if zona is not none else false
+            }}'
+          durOk: '{{ dur >= 5 and dur <= 360 }}'
+          hofokOk: '{{ temp > kezdet }}'
+          rendben: '{{ zona is not none and tempOk and rendben_kezd and kinOk and
+            not ablakVolt and not szivVolt and durOk and hofokOk }}'
+      - if:
+        - condition: template
+          value_template: '{{ rendben }}'
+        then:
+        - action: input_number.set_value
+          target:
+            entity_id: '{{ zona.leallN }}'
+          data:
+            value: '{{ temp | round(2) }}'
+        - action: input_datetime.set_datetime
+          target:
+            entity_id: '{{ zona.leallIdo }}'
+          data:
+            datetime: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}'
+        - action: input_number.set_value
+          target:
+            entity_id: '{{ zona.durN }}'
+          data:
+            value: '{{ dur | round(0) }}'
+        - action: input_number.set_value
+          target:
+            entity_id: '{{ zona.kintiN }}'
+          data:
+            value: '{{ kinti | round(2) }}'
+        - action: input_number.set_value
+          target:
+            entity_id: '{{ zona.pvN }}'
+          data:
+            value: '{{ pv | round(0) }}'
+        - action: input_number.set_value
+          target:
+            entity_id: '{{ zona.celN }}'
+          data:
+            value: '{{ celErtek | float(0) | round(2) }}'
+        - action: input_number.set_value
+          target:
+            entity_id: '{{ zona.maxN }}'
+          data:
+            value: '{{ temp | round(2) }}'
+        - action: input_datetime.set_datetime
+          target:
+            entity_id: '{{ zona.maxI }}'
+          data:
+            datetime: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}'
+        - action: input_boolean.turn_on
+          target:
+            entity_id: '{{ zona.figyelB }}'
+  mode: queued
+  max: 10
+- id: '1789400000006'
+  alias: Padlófűtés tanulás - utánmelegedés megfigyelés (földszint)
+  description: 'Rev.7: a stagnálás-alapú lezárás ÉLŐ, a mostani minta szerint számba
+    adott (maxFrisulMost-gáttal); a lezáró minta csúcsa így mindig a tényleges utána-melegedés
+    maximum. JSON NINCS — a lezáró adat eventben (maxVege/leall/maxIdo/tanulando/zona)
+    a 0007-nek.'
+  triggers:
+  - trigger: time_pattern
+    minutes: /15
+  - trigger: homeassistant
+    event: start
+  conditions: []
+  actions:
+  - repeat:
+      for_each:
+      - zona: konyha
+        temp: sensor.foldszint_konyha_homero_temperature
+        maxN: input_number.padlofutes_max_konyha
+        maxI: input_datetime.padlofutes_max_ido_konyha
+        leall: input_number.padlofutes_leall_konyha
+        leallIdo: input_datetime.padlofutes_leall_ido_konyha
+        figyelB: input_boolean.padlofutes_figyel_konyha
+        tanulandoI: input_datetime.padlofutes_tanulando_ido_konyha
+      - zona: haloszoba
+        temp: sensor.foldszint_haloszoba_homero_temperature
+        maxN: input_number.padlofutes_max_haloszoba
+        maxI: input_datetime.padlofutes_max_ido_haloszoba
+        leall: input_number.padlofutes_leall_haloszoba
+        leallIdo: input_datetime.padlofutes_leall_ido_haloszoba
+        figyelB: input_boolean.padlofutes_figyel_haloszoba
+        tanulandoI: input_datetime.padlofutes_tanulando_ido_haloszoba
+      - zona: furdoszoba
+        temp: sensor.foldszint_furdoszoba_homero_temperature
+        maxN: input_number.padlofutes_max_furdoszoba
+        maxI: input_datetime.padlofutes_max_ido_furdoszoba
+        leall: input_number.padlofutes_leall_furdoszoba
+        leallIdo: input_datetime.padlofutes_leall_ido_furdoszoba
+        figyelB: input_boolean.padlofutes_figyel_furdoszoba
+        tanulandoI: input_datetime.padlofutes_tanulando_ido_furdoszoba
+      - zona: nappali
+        temp: sensor.foldszint_nappali_homero_temperature
+        maxN: input_number.padlofutes_max_nappali
+        maxI: input_datetime.padlofutes_max_ido_nappali
+        leall: input_number.padlofutes_leall_nappali
+        leallIdo: input_datetime.padlofutes_leall_ido_nappali
+        figyelB: input_boolean.padlofutes_figyel_nappali
+        tanulandoI: input_datetime.padlofutes_tanulando_ido_nappali
+      sequence:
+      - variables:
+          figyel: '{{ is_state(repeat.item.figyelB, ''on'') }}'
+          tempOk: '{{ is_number(states(repeat.item.temp)) }}'
+          temp: '{{ states(repeat.item.temp) | float(0) if tempOk else -1 }}'
+          maxRegi: '{{ states(repeat.item.maxN) | float(0) }}'
+          zLeall: '{{ as_timestamp(states(repeat.item.leallIdo)) or 0 }}'
+          zMax: '{{ as_timestamp(states(repeat.item.maxI)) or 0 }}'
+          zMost: '{{ as_timestamp(now()) }}'
+          zTanulando: '{{ as_timestamp(states(repeat.item.tanulandoI)) or 0 }}'
+          elap: '{{ ((zMost - zLeall) / 60) | round(0) if zLeall > 0 else 1440 }}'
+          atfedes: '{{ zTanulando > zLeall and zTanulando > 0 }}'
+      - if:
+        - condition: template
+          value_template: '{{ figyel and tempOk and not atfedes and temp > maxRegi
+            }}'
+        then:
+        - action: input_number.set_value
+          target:
+            entity_id: '{{ repeat.item.maxN }}'
+          data:
+            value: '{{ temp | round(2) }}'
+        - action: input_datetime.set_datetime
+          target:
+            entity_id: '{{ repeat.item.maxI }}'
+          data:
+            datetime: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}'
+      - variables:
+          zMaxFriss: '{{ as_timestamp(states(repeat.item.maxI)) or 0 }}'
+          maxFrisulMost: '{{ figyel and tempOk and not atfedes and (zMaxFriss - zMost)
+            | abs < 30 and states(repeat.item.maxN) | float(0) >= temp }}'
+          maxStagnalUj: '{{ (zMost - zMaxFriss) / 60 >= 15 }}'
+          lezarUj: '{{ elap >= 120 or (maxStagnalUj and elap >= 30 and not maxFrisulMost)
+            }}'
+      - if:
+        - condition: template
+          value_template: '{{ figyel and (atfedes or lezarUj) }}'
+        then:
+        - variables:
+            maxNMost: '{{ states(repeat.item.maxN) | float(0) }}'
+            maxIdoMost: '{{ states(repeat.item.maxI) }}'
+            leallTemp: '{{ states(repeat.item.leall) | float(0) }}'
+            celCiklus: '{{ states(''input_number.padlofutes_cel_'' ~ repeat.item.zona)
+              }}'
+        - event: padlofutes_ciklus_lezarva
+          event_data:
+            zona: '{{ repeat.item.zona }}'
+            maxVege: '{{ maxNMost | round(2) }}'
+            celCiklus: '{{ celCiklus if is_number(celCiklus) else ''unknown'' }}'
+            leall: '{{ leallTemp | round(2) }}'
+            maxIdo: '{{ maxIdoMost }}'
+            tanulando: '{{ states(repeat.item.tanulandoI) }}'
+        - action: input_boolean.turn_off
+          target:
+            entity_id: '{{ repeat.item.figyelB }}'
+        - action: input_datetime.set_datetime
+          target:
+            entity_id: '{{ repeat.item.tanulandoI }}'
+          data:
+            datetime: '1970-01-01 00:00:00'
+  mode: single
+- id: '1789400000007'
+  alias: Padlófűtés tanulás - reziduum korrekció (földszint)
+  description: 'Rev.6: egyszerű reziduum-tanulás. Érvényes lezárt ciklus ES SZIGNIFIKÁNS
+    IDŐBELI KEREZT (maxIdo < tanulando) esetén rise_new = [[rise_old + 0.2·(maxVege
+    − cel), 0.05] | max, 1.5] | min   (rev.8 hordozható forma) Json és súlyozott 3-ciklusos
+    predikció ELHAGYVA — egy zóna, egy tanult érték. Küszöb frissítés változatlan:
+    max(cel−rise, 0.16).'
+  triggers:
+  - trigger: event
+    event_type: padlofutes_ciklus_lezarva
+    id: ciklus_vege
+  - trigger: time_pattern
+    minutes: /15
+    id: periodikus
+  - trigger: homeassistant
+    event: start
+    id: ha_start
+  conditions: []
+  actions:
+  - variables:
+      ejszaka: '{{ now().hour >= 21 or now().hour < 6 }}'
+      ejszakaPercek: "{% if now().hour >= 21 %}\n  {{ (now().hour - 21) * 60 + now().minute
+        }}\n{% else %}\n  {{ (now().hour + 3) * 60 + now().minute }}\n{% endif %}"
+      ejszakaLepes: '{{ ((ejszakaPercek | int) // 30) * 0.5 }}'
+      zonaList:
+      - zona: konyha
+        riseN: input_number.padlofutes_rise_konyha
+        kuszobN: input_number.padlofutes_kuszob_konyha
+        celN: input_number.padlofutes_cel_konyha
+        napCel: 21.0
+        ejszCel: 18.0
+      - zona: haloszoba
+        riseN: input_number.padlofutes_rise_haloszoba
+        kuszobN: input_number.padlofutes_kuszob_haloszoba
+        celN: input_number.padlofutes_cel_haloszoba
+        napCel: 22.0
+        ejszCel: 19.0
+      - zona: furdoszoba
+        riseN: input_number.padlofutes_rise_furdoszoba
+        kuszobN: input_number.padlofutes_kuszob_furdoszoba
+        celN: input_number.padlofutes_cel_furdoszoba
+        napCel: 23.0
+        ejszCel: 19.0
+      - zona: nappali
+        riseN: input_number.padlofutes_rise_nappali
+        kuszobN: input_number.padlofutes_kuszob_nappali
+        celN: input_number.padlofutes_cel_nappali
+        napCel: 22.0
+        ejszCel: 19.0
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: ciklus_vege
+      sequence:
+      - variables:
+          zona: '{% set l = (zonaList | selectattr(''zona'', ''equalto'', trigger.event.data.zona)
+            | list) %} {{ l[0] if l | length > 0 else none }}'
+          celErtek: "{% set raw = trigger.event.data.celCiklus\n  if trigger.event.data
+            is mapping\n  and trigger.event.data.celCiklus is defined\n  else none
+            %}\n{% if raw is not none and raw | is_number %}\n  {{ raw | float }}\n{%
+            elif zona is not none and states(zona.celN) | is_number %}\n  {{ states(zona.celN)
+            | float }}\n{% else %}\n  {{ none }}\n{% endif %}"
+          celOk: '{{ celErtek is not none and celErtek | is_number }}'
+          maxVege: '{% set raw = trigger.event.data.maxVege if (trigger.event.data
+            is mapping and trigger.event.data.maxVege is defined) else none %} {{
+            raw | float if raw is not none and raw | is_number else none }}'
+          maxIdo: '{{ trigger.event.data.maxIdo if trigger.event.data is mapping and
+            trigger.event.data.maxIdo is defined else '''' }}'
+          tanulando: '{{ trigger.event.data.tanulando if trigger.event.data is mapping
+            and trigger.event.data.tanulando is defined else '''' }}'
+          maxIdoOk: "{{ zona is not none and (as_timestamp(maxIdo) or 0) > 0 and (
+            (as_timestamp(tanulando) or 0) <= 0\n      or (as_timestamp(maxIdo) or
+            0) <= (as_timestamp(tanulando) or 0) ) }}"
+          regiTanult: '{% set raw = states(zona.riseN) if zona is not none else none
+            %} {{ raw | float if raw is not none and raw | is_number else none }}'
+          tulloves: "{% if maxVege is not none and maxVege | is_number and celOk and
+            celErtek is not none %}\n  {{ (maxVege - celErtek | float) | round(2)
+            }}\n{% else %}\n  {{ none }}\n{% endif %}"
+          hatarolt: "{% if tulloves is not none and tulloves | is_number and regiTanult
+            | is_number %}\n  {{ [[regiTanult + 0.2 * tulloves, 0.05] | max, 1.5]
+            | min | round(2) }}\n{% else %}\n  {{ none }}\n{% endif %}"
+          celMost: "{% if zona is not none and not ejszaka %}\n  {{ zona.napCel }}\n{%
+            elif zona is not none %}\n  {{ [zona.ejszCel, (zona.napCel - ejszakaLepes)
+            | float] | max }}\n{% else %}\n  0\n{% endif %}"
+          kuszobUj: "{% if hatarolt is not none and hatarolt | is_number %}\n  {{
+            [celMost - hatarolt, 0.16] | max | round(2) }}\n{% else %}\n  {{ none
+            }}\n{% endif %}"
+      - if:
+        - condition: template
+          value_template: '{{ zona is not none and maxIdoOk and hatarolt is not none
+            and hatarolt | is_number and kuszobUj is not none and kuszobUj | is_number
+            }}'
+        then:
+        - action: input_number.set_value
+          target:
+            entity_id: '{{ zona.riseN }}'
+          data:
+            value: '{{ hatarolt }}'
+        - action: input_number.set_value
+          target:
+            entity_id: '{{ zona.kuszobN }}'
+          data:
+            value: '{{ kuszobUj }}'
+    - conditions:
+      - condition: trigger
+        id:
+        - periodikus
+        - ha_start
+      sequence:
+      - repeat:
+          for_each:
+          - riseN: input_number.padlofutes_rise_konyha
+            kuszobN: input_number.padlofutes_kuszob_konyha
+            napCel: 21.0
+            ejszCel: 18.0
+          - riseN: input_number.padlofutes_rise_haloszoba
+            kuszobN: input_number.padlofutes_kuszob_haloszoba
+            napCel: 22.0
+            ejszCel: 19.0
+          - riseN: input_number.padlofutes_rise_furdoszoba
+            kuszobN: input_number.padlofutes_kuszob_furdoszoba
+            napCel: 23.0
+            ejszCel: 19.0
+          - riseN: input_number.padlofutes_rise_nappali
+            kuszobN: input_number.padlofutes_kuszob_nappali
+            napCel: 22.0
+            ejszCel: 19.0
+          sequence:
+          - variables:
+              riseErvenyes: '{{ states(repeat.item.riseN) | is_number }}'
+              rise: '{{ states(repeat.item.riseN) | float(0) }}'
+              celMost: "{% if not ejszaka %}\n  {{ repeat.item.napCel }}\n{% else
+                %}\n  {{ [repeat.item.ejszCel, (repeat.item.napCel - ejszakaLepes)
+                | float] | max }}\n{% endif %}"
+              kuszobUj: "{% if rise > 0 %}\n  {{ [celMost - rise, 0.16] | max | round(2)
+                }}\n{% else %}\n  0\n{% endif %}"
+          - if:
+            - condition: template
+              value_template: '{{ riseErvenyes }}'
+            then:
+            - action: input_number.set_value
+              target:
+                entity_id: '{{ repeat.item.kuszobN }}'
+              data:
+                value: '{{ kuszobUj }}'
+  mode: single
+- id: konyha_bojler_homerseklet_szabalyozas
+  alias: Konyha bojler hőmérséklet szabályozás
+  description: 50-55 °C között tartás 07:00-22:00 között
+  triggers:
+  - trigger: time_pattern
+    minutes: /1
+  - trigger: time
+    at: 07:00:00
+  - trigger: time
+    at: '22:00:00'
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: time
+        after: '22:00:00'
+        before: 07:00:00
+      sequence:
+      - action: switch.turn_off
+        target:
+          entity_id: switch.konyha_bojler_konnektor
+    - conditions:
+      - condition: time
+        after: 07:00:00
+        before: '22:00:00'
+      - condition: numeric_state
+        entity_id: sensor.konyha_bojler_homero_temperature_probe
+        below: 50
+      sequence:
+      - action: switch.turn_on
+        target:
+          entity_id: switch.konyha_bojler_konnektor
+    - conditions:
+      - condition: time
+        after: 07:00:00
+        before: '22:00:00'
+      - condition: numeric_state
+        entity_id: sensor.konyha_bojler_homero_temperature_probe
+        above: 55
+      sequence:
+      - action: switch.turn_off
+        target:
+          entity_id: switch.konyha_bojler_konnektor
+  mode: single
+- id: bojler_homerseklet_szabalyozas
+  alias: Bojler hőmérséklet szabályozás
+  description: Bojler 50-55 C között tartása 15:00-22:00 között
+  triggers:
+  - trigger: time_pattern
+    minutes: /1
+    id: ot_perc
+  - trigger: time
+    at: '15:00:00'
+    id: bekapcsolasi_idoszak
+  - trigger: time
+    at: '22:00:00'
+    id: kikapcsolasi_idoszak
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: kikapcsolasi_idoszak
+      sequence:
+      - action: switch.turn_off
+        target:
+          entity_id: switch.bojler
+    - conditions:
+      - condition: time
+        after: '15:00:00'
+        before: '22:00:00'
+      - condition: numeric_state
+        entity_id: sensor.bojler_temperature
+        below: 50
+      sequence:
+      - action: switch.turn_on
+        target:
+          entity_id: switch.bojler
+    - conditions:
+      - condition: time
+        after: '15:00:00'
+        before: '22:00:00'
+      - condition: numeric_state
+        entity_id: sensor.bojler_temperature
+        above: 55
+      sequence:
+      - action: switch.turn_off
+        target:
+          entity_id: switch.bojler
+- id: '1789650000001'
+  alias: Teszt konnektor óránkénti BE-KI ciklus
+  description: Teszt konnektor 10 perc BE, 10 perc KI folyamatos ismétléssel
+  triggers:
+  - trigger: time_pattern
+    minutes: /1
+  actions:
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ now().minute // 10 % 2 == 0 }}'
+      sequence:
+      - action: switch.turn_on
+        target:
+          entity_id: switch.teszt_konnektor
+    - conditions:
+      - condition: template
+        value_template: '{{ now().minute // 10 % 2 == 1 }}'
+      sequence:
+      - action: switch.turn_off
+        target:
+          entity_id: switch.teszt_konnektor
+  mode: single
+- id: '1789650000002'
+  alias: OBK5506CDD6 jelenlét naplózása
+  description: Az OBK WiFi eszköz elérhetőségének külön fájlba naplózása
+  triggers:
+  - trigger: state
+    entity_id: binary_sensor.obk5506cdd6_jelenlet
+  actions:
+  - action: shell_command.obk5506cdd6_jelenlet_log
+  mode: queued
+- id: '1789926172328'
+  alias: Motor Töltők BE 10.00
+  description: ''
+  triggers:
+  - trigger: time
+    at: '10:00:00'
+    weekday:
+    - mon
+    - tue
+    - wed
+    - thu
+    - fri
+    - sat
+    - sun
+  conditions: []
+  actions:
+  - action: switch.turn_on
+    metadata: {}
+    target:
+      entity_id: switch.teszt_konnektor
+    data: {}
+  mode: single
+- id: '1789926275211'
+  alias: Motorok töltők KI 16.00
+  description: ''
+  triggers:
+  - trigger: time
+    at: '16:00:00'
+    weekday:
+    - mon
+    - tue
+    - wed
+    - thu
+    - fri
+    - sat
+    - sun
+  conditions: []
+  actions:
+  - action: switch.turn_off
+    metadata: {}
+    target:
+      device_id: ba11f7e202bc7b75aeeba5e4c3744412
+    data: {}
+  mode: single
+- id: '1789400000010'
+  alias: OBK55B72BCA jelenlét naplózása
+  description: OBK55B72BCA elérhetőség változásának naplózása fájlba
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.obk55b72bca_jelenlet
+  action:
+  - service: shell_command.obk55b72bca_jelenlet_log
+  mode: queued
+- id: '1789400000011'
+  alias: Földszint WC villany – jelenlét riasztás
+  description: Ha a WC villany jelenlétérzékelője 10 percnél tovább elérhető, percenként
+    push riasztást küld.
+  triggers:
+  - entity_id: binary_sensor.obk55b72bca_jelenlet
+    to: 'on'
+    for: 00:10:00
+    trigger: state
+  conditions: []
+  actions:
+  - repeat:
+      while:
+      - condition: state
+        entity_id: binary_sensor.obk55b72bca_jelenlet
+        state: 'on'
+      sequence:
+      - action: notify.notify
+        data:
+          message: Wc villany
+      - delay: 00:01:00
+  mode: restart
