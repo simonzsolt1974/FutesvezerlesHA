@@ -1,0 +1,472 @@
+# =============================================================================
+#  Padlófűtés prediktív tanuló rendszer - SEGÉD-ENTITÁSOK (földszint, 4 zóna)
+# =============================================================================
+#  BETÖLTÉS – FIGYELEM, csak EGYSÉGES módszer az ajánlott:
+#
+#  AJÁNLOTT: PACKAGE MÓDSZER.
+#    A fájl NÉGY domain-t tartalmaz (input_boolean / input_number /
+#    input_datetime / input_text), ezért csak komplett package-ként
+#    tölthető be. A configuration.yaml-ben:
+#
+#      homeassistant:
+#        packages: !include_dir_merge_named packages
+#
+#    és ezt a fájlt a `packages/padlofutes_segedek.yaml` helyre tenni.
+#
+#  NEM AJÁNLOTT: `input_boolean: !include padlofutes_segedek.yaml`
+#    Ez csak akkor működne, ha a fájlban CSAK az input_boolean alatti
+#    entitás-definíciók lennének (a négy domain együtt). Ez a fájl
+#    szándékosan négy domént tartalmaz, ezért az include módszer
+#    konfigurációs hibát adna.
+#
+#  A segéd-entitások perzisztensek: HA újraindítás után a tanult értékek
+#  megmaradnak (nincs `initial:`, így nem resetelődnek). Első használatkor
+#  a 0005/0006/0007 számol az üres (unknown/unavailable) állapotokkal:
+#  - rev.6: a JSON ciklus-tárolás megszűnt — nincs input_text, a lezáró
+#    adat a 0006 custom EVENT-jében (padlofutes_ciklus_lezarva) jut át
+#    a 0007-be (maxVege/leall/maxIdo/tanulando/zona).
+#  - az `as_timestamp(... or 0)` mintázat biztosítja, hogy nem beállított
+#    input_datetime (1970 előtti vagy unknown) 0-ává válik és nem okoz
+#    template-hibát.
+#
+#  Ezek az entitások nem rendelkeznek felhasználói felülettel, csak a
+#  0001 / 0005 / 0006 / 0007 automatizmusok használják őket.
+# ============================================================================
+
+input_boolean:
+  # Predikciós engedélyezés zónánként (kikapcsolva: klasszikus ±0,2 °C hiszterézis)
+  padlofutes_prediktiv_konyha:
+    name: Prediktív zárás - Konyha
+  padlofutes_prediktiv_haloszoba:
+    name: Prediktív zárás - Hálószoba
+  padlofutes_prediktiv_furdoszoba:
+    name: Prediktív zárás - Fürdőszoba
+  padlofutes_prediktiv_nappali:
+    name: Prediktív zárás - Nappali
+
+  # Zárás utáni utánmelegedés megfigyelés aktív jelzője
+  # Érvénytelenítő zászlók: ciklus közben történt ablaknyitás / szivattyú-kiesés
+  # (0005 állítja, a ciklus lezárásakor a talált érték alapján értékeli ki 0006)
+  padlofutes_ablak_ciklus_konyha:
+    name: Ablak a ciklusban - Konyha
+  padlofutes_ablak_ciklus_haloszoba:
+    name: Ablak a ciklusban - Hálószoba
+  padlofutes_ablak_ciklus_furdoszoba:
+    name: Ablak a ciklusban - Fürdőszoba
+  padlofutes_ablak_ciklus_nappali:
+    name: Ablak a ciklusban - Nappali
+
+  padlofutes_szivattyu_ciklus_konyha:
+    name: Szivattyú-kiesés a ciklusban - Konyha
+  padlofutes_szivattyu_ciklus_haloszoba:
+    name: Szivattyú-kiesés a ciklusban - Hálószoba
+  padlofutes_szivattyu_ciklus_furdoszoba:
+    name: Szivattyú-kiesés a ciklusban - Fürdőszoba
+  padlofutes_szivattyu_ciklus_nappali:
+    name: Szivattyú-kiesés a ciklusban - Nappali
+
+  padlofutes_figyel_konyha:
+    name: Utánmelegedés figyelés - Konyha
+  padlofutes_figyel_haloszoba:
+    name: Utánmelegedés figyelés - Hálószoba
+  padlofutes_figyel_furdoszoba:
+    name: Utánmelegedés figyelés - Fürdőszoba
+  padlofutes_figyel_nappali:
+    name: Utánmelegedés figyelés - Nappali
+
+input_number:
+  # --- Baseline (0001): az ablak/évforduló előtti referencia-hőfok -------
+  # A percenkenti döntések ehhez az Alap-értéket viszonyítják (lassú
+  # mozgás-követés, ablak-észlelés: temp <= baseline − 1.0). A
+  # timer-finished ág és a 21:00/06:00 reset végzi a visszaállítást.
+  # NEM KELL, BENNE VAN A configuration.yaml   FILE-BEN MÁR !!!
+  #padlofutes_elotte_konyha:
+  # name: Alaphelyzet hőfok - Konyha
+  #  min: 0
+  #  max: 40
+  #  step: 0.1
+  #  mode: box
+  #  unit_of_measurement: "°C"
+  #padlofutes_elotte_haloszoba:
+  #  name: Alaphelyzet hőfok - Hálószoba
+  #  min: 0
+  #  max: 40
+  #  step: 0.1
+  #  mode: box
+  #  unit_of_measurement: "°C"
+  #padlofutes_elotte_furdoszoba:
+  #  name: Alaphelyzet hőfok - Fürdőszoba
+  #  min: 0
+  #  max: 40
+  #  step: 0.1
+  #  mode: box
+  #  unit_of_measurement: "°C"
+  #padlofutes_elotte_nappali:
+  #  name: Alaphelyzet hőfok - Nappali
+  #  min: 0
+  #  max: 40
+  #  step: 0.1
+  #  mode: box
+  #  unit_of_measurement: "°C"
+
+  # --- Predikció kimenetek -----------------------------------------------
+  # Prediktív zárási küszöb: a szelep ezt a hőmérsékletet elérve ZÁR.
+  # 0 = a tanulás nem eléggé megbízható, 0001 a klasszikus ±0,2 hiszterézist használja.
+  padlofutes_kuszob_konyha:
+    name: Prediktív zárási küszöb - Konyha
+    min: 0
+    max: 40
+    step: 0.1
+    mode: box
+    unit_of_measurement: "°C"
+  padlofutes_kuszob_haloszoba:
+    name: Prediktív zárási küszöb - Hálószoba
+    min: 0
+    max: 40
+    step: 0.1
+    mode: box
+    unit_of_measurement: "°C"
+  padlofutes_kuszob_furdoszoba:
+    name: Prediktív zárási küszöb - Fürdőszoba
+    min: 0
+    max: 40
+    step: 0.1
+    mode: box
+    unit_of_measurement: "°C"
+  padlofutes_kuszob_nappali:
+    name: Prediktív zárási küszöb - Nappali
+    min: 0
+    max: 40
+    step: 0.1
+    mode: box
+    unit_of_measurement: "°C"
+
+  # A megtanult tipikus utánmelegedés (rise) °C -ban
+  padlofutes_rise_konyha:
+    name: Tanult utánmelegedés - Konyha
+    min: 0
+    max: 5
+    step: 0.1
+    mode: box
+    unit_of_measurement: "°C"
+  padlofutes_rise_haloszoba:
+    name: Tanult utánmelegedés - Hálószoba
+    min: 0
+    max: 5
+    step: 0.1
+    mode: box
+    unit_of_measurement: "°C"
+  padlofutes_rise_furdoszoba:
+    name: Tanult utánmelegedés - Fürdőszoba
+    min: 0
+    max: 5
+    step: 0.1
+    mode: box
+    unit_of_measurement: "°C"
+  padlofutes_rise_nappali:
+    name: Tanult utánmelegedés - Nappali
+    min: 0
+    max: 5
+    step: 0.1
+    mode: box
+    unit_of_measurement: "°C"
+
+  # --- Alacsonyabb szintű ciklus-nyilvántartás (0005/0006 közti átmenet) ---
+  # Fűtés kezdeti hőmérséklete (a szelep NYIT-ásakor)
+  padlofutes_kezdet_konyha:
+    name: Ciklus kezdő hőfok - Konyha
+    min: 0
+    max: 40
+    step: 0.1
+    mode: box
+    unit_of_measurement: "°C"
+  padlofutes_kezdet_haloszoba:
+    name: Ciklus kezdő hőfok - Hálószoba
+    min: 0
+    max: 40
+    step: 0.1
+    mode: box
+    unit_of_measurement: "°C"
+  padlofutes_kezdet_furdoszoba:
+    name: Ciklus kezdő hőfok - Fürdőszoba
+    min: 0
+    max: 40
+    step: 0.1
+    mode: box
+    unit_of_measurement: "°C"
+  padlofutes_kezdet_nappali:
+    name: Ciklus kezdő hőfok - Nappali
+    min: 0
+    max: 40
+    step: 0.1
+    mode: box
+    unit_of_measurement: "°C"
+
+  # Fűtés leállítási hőmérséklete (a szelep ZÁR-ásakor)
+  padlofutes_leall_konyha:
+    name: Ciklus záró hőfok - Konyha
+    min: 0
+    max: 40
+    step: 0.1
+    mode: box
+    unit_of_measurement: "°C"
+  padlofutes_leall_haloszoba:
+    name: Ciklus záró hőfok - Hálószoba
+    min: 0
+    max: 40
+    step: 0.1
+    mode: box
+    unit_of_measurement: "°C"
+  padlofutes_leall_furdoszoba:
+    name: Ciklus záró hőfok - Fürdőszoba
+    min: 0
+    max: 40
+    step: 0.1
+    mode: box
+    unit_of_measurement: "°C"
+  padlofutes_leall_nappali:
+    name: Ciklus záró hőfok - Nappali
+    min: 0
+    max: 40
+    step: 0.1
+    mode: box
+    unit_of_measurement: "°C"
+
+  # A zárás után követett legmagasabb hőmérséklet (utánmelegedés csúcsa)
+  padlofutes_max_konyha:
+    name: Zárás utáni max hőfok - Konyha
+    min: 0
+    max: 40
+    step: 0.1
+    mode: box
+    unit_of_measurement: "°C"
+  padlofutes_max_haloszoba:
+    name: Zárás utáni max hőfok - Hálószoba
+    min: 0
+    max: 40
+    step: 0.1
+    mode: box
+    unit_of_measurement: "°C"
+  padlofutes_max_furdoszoba:
+    name: Zárás utáni max hőfok - Fürdőszoba
+    min: 0
+    max: 40
+    step: 0.1
+    mode: box
+    unit_of_measurement: "°C"
+  padlofutes_max_nappali:
+    name: Zárás utáni max hőfok - Nappali
+    min: 0
+    max: 40
+    step: 0.1
+    mode: box
+    unit_of_measurement: "°C"
+
+  # Fűtés időtartama (perc)
+  padlofutes_dur_konyha:
+    name: Ciklus időtartam - Konyha
+    min: 0
+    max: 1440
+    step: 1
+    mode: box
+    unit_of_measurement: "min"
+  padlofutes_dur_haloszoba:
+    name: Ciklus időtartam - Hálószoba
+    min: 0
+    max: 1440
+    step: 1
+    mode: box
+    unit_of_measurement: "min"
+  padlofutes_dur_furdoszoba:
+    name: Ciklus időtartam - Fürdőszoba
+    min: 0
+    max: 1440
+    step: 1
+    mode: box
+    unit_of_measurement: "min"
+  padlofutes_dur_nappali:
+    name: Ciklus időtartam - Nappali
+    min: 0
+    max: 1440
+    step: 1
+    mode: box
+    unit_of_measurement: "min"
+
+  # A zóna célhőmérséklete a ciklus leállításának pillanatában
+  padlofutes_cel_konyha:
+    name: Ciklus célhőfok - Konyha
+    min: 0
+    max: 40
+    step: 0.1
+    mode: box
+    unit_of_measurement: "°C"
+  padlofutes_cel_haloszoba:
+    name: Ciklus célhőfok - Hálószoba
+    min: 0
+    max: 40
+    step: 0.1
+    mode: box
+    unit_of_measurement: "°C"
+  padlofutes_cel_furdoszoba:
+    name: Ciklus célhőfok - Fürdőszoba
+    min: 0
+    max: 40
+    step: 0.1
+    mode: box
+    unit_of_measurement: "°C"
+  padlofutes_cel_nappali:
+    name: Ciklus célhőfok - Nappali
+    min: 0
+    max: 40
+    step: 0.1
+    mode: box
+    unit_of_measurement: "°C"
+
+  # Kinti átlaghőmérséklet a ciklus leállításának pillanatában
+  padlofutes_kinti_konyha:
+    name: Ciklus kinti hőfok - Konyha
+    min: -50
+    max: 60
+    step: 0.1
+    mode: box
+    unit_of_measurement: "°C"
+  padlofutes_kinti_haloszoba:
+    name: Ciklus kinti hőfok - Hálószoba
+    min: -50
+    max: 60
+    step: 0.1
+    mode: box
+    unit_of_measurement: "°C"
+  padlofutes_kinti_furdoszoba:
+    name: Ciklus kinti hőfok - Fürdőszoba
+    min: -50
+    max: 60
+    step: 0.1
+    mode: box
+    unit_of_measurement: "°C"
+  padlofutes_kinti_nappali:
+    name: Ciklus kinti hőfok - Nappali
+    min: -50
+    max: 60
+    step: 0.1
+    mode: box
+    unit_of_measurement: "°C"
+
+  # Napelem teljesítmény (W) a ciklus leállításának pillanatában (napenergia-súly)
+  padlofutes_pv_konyha:
+    name: Ciklus PV teljesítmény - Konyha
+    min: 0
+    max: 15000
+    step: 1
+    mode: box
+    unit_of_measurement: "W"
+  padlofutes_pv_haloszoba:
+    name: Ciklus PV teljesítmény - Hálószoba
+    min: 0
+    max: 15000
+    step: 1
+    mode: box
+    unit_of_measurement: "W"
+  padlofutes_pv_furdoszoba:
+    name: Ciklus PV teljesítmény - Fürdőszoba
+    min: 0
+    max: 15000
+    step: 1
+    mode: box
+    unit_of_measurement: "W"
+  padlofutes_pv_nappali:
+    name: Ciklus PV teljesítmény - Nappali
+    min: 0
+    max: 15000
+    step: 1
+    mode: box
+    unit_of_measurement: "W"
+
+input_datetime:
+  # 0006: mit jegyezzen fel, ha új ciklus indul megfigyelés közben (jóváhagyási idő)
+  padlofutes_tanulando_ido_konyha:
+    name: Lezárandó megfigyelés idő - Konyha
+    has_date: true
+    has_time: true
+  padlofutes_tanulando_ido_haloszoba:
+    name: Lezárandó megfigyelés idő - Hálószoba
+    has_date: true
+    has_time: true
+  padlofutes_tanulando_ido_furdoszoba:
+    name: Lezárandó megfigyelés idő - Fürdőszoba
+    has_date: true
+    has_time: true
+  padlofutes_tanulando_ido_nappali:
+    name: Lezárandó megfigyelés idő - Nappali
+    has_date: true
+    has_time: true
+
+  # Ciklus kezdete (a szelep NYIT-nak történő időbélyege)
+  padlofutes_ido_konyha:
+    name: Ciklus kezdete (idő) - Konyha
+    has_date: true
+    has_time: true
+  padlofutes_ido_haloszoba:
+    name: Ciklus kezdete (idő) - Hálószoba
+    has_date: true
+    has_time: true
+  padlofutes_ido_furdoszoba:
+    name: Ciklus kezdete (idő) - Fürdőszoba
+    has_date: true
+    has_time: true
+  padlofutes_ido_nappali:
+    name: Ciklus kezdete (idő) - Nappali
+    has_date: true
+    has_time: true
+
+  # Ciklus vége (a szelep ZÁR-nak történő időbélyege)
+  padlofutes_leall_ido_konyha:
+    name: Ciklus vége (idő) - Konyha
+    has_date: true
+    has_time: true
+  padlofutes_leall_ido_haloszoba:
+    name: Ciklus vége (idő) - Hálószoba
+    has_date: true
+    has_time: true
+  padlofutes_leall_ido_furdoszoba:
+    name: Ciklus vége (idő) - Fürdőszoba
+    has_date: true
+    has_time: true
+  padlofutes_leall_ido_nappali:
+    name: Ciklus vége (idő) - Nappali
+    has_date: true
+    has_time: true
+
+  # Az utolsó utánmelegedés-csúcs pillanata (a "megállt a melegedés" észleléséhez)
+  padlofutes_max_ido_konyha:
+    name: Utánmelegedés csúcsa (idő) - Konyha
+    has_date: true
+    has_time: true
+  padlofutes_max_ido_haloszoba:
+    name: Utánmelegedés csúcsa (idő) - Hálószoba
+    has_date: true
+    has_time: true
+  padlofutes_max_ido_furdoszoba:
+    name: Utánmelegedés csúcsa (idő) - Fürdőszoba
+    has_date: true
+    has_time: true
+  padlofutes_max_ido_nappali:
+    name: Utánmelegedés csúcsa (idő) - Nappali
+    has_date: true
+    has_time: true
+
+# ----------------------------------------------------------------------------
+#  rev.6 MEGJEGYZES: az `input_text` domain KIkerult a seged-fajlbol.
+#
+#  A korabbi `padlofutes_ciklusok_*` input_text entitasok (255 char JSON
+#  ciklus-adatbazis) a rev.6 egyszerusitett tanulasban mar NINCS
+#  hasznalatban: a lezaro ciklus adatai a 0006 -> 0007 custom EVENT-jeben
+#  (padlofutes_ciklus_lezarva) jutnak at (maxVege / leall / maxIdo /
+#  tanulando / zona), a tanult ertek a `padlofutes_rise_*` numerikus
+#  input_number-okben el.
+#
+#  HA-ban a regi entitasok kezi torlese a takaritas kedveert ajanlott
+#  (senki nem olvassa oket, igy a torlesuk NEM kotelezo a mukodeshez):
+#  Beallitasok -> Eszkozok es szolgaltatasok -> Segedok -> 'Tanult ciklusok - ...'
+#  -> Torles (mind a negy zonara).
+# ----------------------------------------------------------------------------

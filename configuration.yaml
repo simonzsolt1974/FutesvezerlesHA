@@ -1,0 +1,356 @@
+﻿# Loads default set of integrations. Do not remove.
+default_config:
+
+homeassistant:
+  packages: !include_dir_named packages
+
+# Load frontend themes from the themes folder
+frontend:
+  themes: !include_dir_merge_named themes
+
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+
+http:
+  use_x_forwarded_for: true
+  trusted_proxies:
+    - 127.0.0.1
+    - "::1"
+  ip_ban_enabled: true
+  login_attempts_threshold: 5
+
+rest_command:
+  github_frissites_letoltese:
+    url: "http://127.0.0.1:8765/pull"
+    method: POST
+    headers:
+      authorization: !secret ha_git_pull_authorization
+    timeout: 120
+
+lovelace:
+  resource_mode: yaml
+
+  resources:
+    - url: /local/vizora-csv-manager-card.js
+      type: module
+
+    - url: /local/apexcharts-card.js?v=2.2.3
+      type: module
+
+    - url: /local/solplanet-csv-manager-card.js
+      type: module
+
+    - url: /local/three-phase-power-meter-card-v5.js?v=5
+      type: module
+
+  dashboards:
+
+    vizora-dashboard:
+      mode: yaml
+      title: Vízóra
+      icon: mdi:water-meter
+      show_in_sidebar: true
+      require_admin: false
+      filename: dashboards/vizora.yaml
+
+    napelem-dashboard:
+      mode: yaml
+      title: Napelem
+      icon: mdi:solar-power
+      show_in_sidebar: true
+      require_admin: false
+      filename: dashboards/napelem.yaml
+
+    teljesitmenymero-dashboard:
+      mode: yaml
+      title: Teljesítménymérő
+      icon: mdi:transmission-tower
+      show_in_sidebar: true
+      require_admin: false
+      filename: dashboards/teljesitmenymero.yaml
+
+    p1meter-dashboard:
+      mode: yaml
+      title: P1 Mérő
+      icon: mdi:meter-electric
+      show_in_sidebar: true
+      require_admin: false
+      filename: dashboards/p1meter.yaml
+
+    paradox-dashboard:
+      mode: yaml
+      title: Paradox SP5500
+      icon: mdi:shield-home
+      show_in_sidebar: true
+      require_admin: false
+      filename: dashboards/paradox.yaml
+
+solplanet_csv_manager:
+
+vizora_csv_manager:
+
+# ==============================================================
+# P1 – DERIVÁLT szenzorok
+#
+# A firmware (ESP32C3_P1METER) csak EGY globális teljesítménytényezőt
+# publikál (power_factor), fázisonkéntit nem. A fázis-PF ezért
+# VISSZAFEJTETT érték: |P_fázis| / (U × |I|). Kis terhelésnél
+# (egész amperes mérés) pontatlan lehet -> 1-es alatt unavailable.
+# ==============================================================
+
+template:
+  - binary_sensor:
+      - name: "OBK5506CDD6 jelenlét"
+        unique_id: "obk5506cdd6_jelenlet"
+        state: >
+          {{ states('switch.obk5506cdd6_0') not in ['unavailable', 'unknown'] }}
+        device_class: connectivity
+        icon: >
+          {% if is_state('binary_sensor.obk5506cdd6_jelenlet', 'on') %}
+            mdi:wifi
+          {% else %}
+            mdi:wifi-off
+          {% endif %}
+      - name: "OBK55B72BCA jelenlét"
+        unique_id: obk55b72bca_jelenlet
+        device_class: connectivity
+        state: >
+          {{ states('switch.obk55b72bca_1') not in ['unavailable', 'unknown'] }}
+  - sensor:
+
+      # ---- Előjeles fázisáramok ----
+
+      - name: "P1 áram L1 (előjeles)"
+        unique_id: p1_aram_l1_elojeles
+        unit_of_measurement: "A"
+        device_class: current
+        state_class: measurement
+        state: >
+          {% set i = states('sensor.p1_aram_l1') | float(none) %}
+          {% set tot = states('sensor.p1_pillanatnyi_teljesitmeny') | float(none) %}
+          {% if i is none or tot is none %}
+            unavailable
+          {% else %}
+            {% set sign = -1 if tot < 0 else 1 %}
+            {{ ((i | abs) * sign) | round(2) }}
+          {% endif %}
+
+      - name: "P1 áram L2 (előjeles)"
+        unique_id: p1_aram_l2_elojeles
+        unit_of_measurement: "A"
+        device_class: current
+        state_class: measurement
+        state: >
+          {% set i = states('sensor.p1_aram_l2') | float(none) %}
+          {% set tot = states('sensor.p1_pillanatnyi_teljesitmeny') | float(none) %}
+          {% if i is none or tot is none %}
+            unavailable
+          {% else %}
+            {% set sign = -1 if tot < 0 else 1 %}
+            {{ ((i | abs) * sign) | round(2) }}
+          {% endif %}
+
+      - name: "P1 áram L3 (előjeles)"
+        unique_id: p1_aram_l3_elojeles
+        unit_of_measurement: "A"
+        device_class: current
+        state_class: measurement
+        state: >
+          {% set i = states('sensor.p1_aram_l3') | float(none) %}
+          {% set tot = states('sensor.p1_pillanatnyi_teljesitmeny') | float(none) %}
+          {% if i is none or tot is none %}
+            unavailable
+          {% else %}
+            {% set sign = -1 if tot < 0 else 1 %}
+            {{ ((i | abs) * sign) | round(2) }}
+          {% endif %}
+
+      # ---- Visszafejtett fázisonkénti teljesítménytényező ----
+
+      - name: "P1 teljesítménytényező L1"
+        unique_id: p1_teljesitmenytenyezo_l1
+        device_class: power_factor
+        state_class: measurement
+        state: >
+          {% set p = states('sensor.p1_fazis_teljesitmeny_l1') | float(none) %}
+          {% set u = states('sensor.p1_feszultseg_l1') | float(none) %}
+          {% set i = states('sensor.p1_aram_l1') | float(none) %}
+          {% if p is none or u is none or i is none %}
+            unavailable
+          {% else %}
+            {% set s = u * (i | abs) %}
+            {% if s < 1 %}
+              unavailable
+            {% else %}
+              {% set pf = (p | abs) / s %}
+              {{ pf | round(3) if pf <= 1.2 else 'unavailable' }}
+            {% endif %}
+          {% endif %}
+
+      - name: "P1 teljesítménytényező L2"
+        unique_id: p1_teljesitmenytenyezo_l2
+        device_class: power_factor
+        state_class: measurement
+        state: >
+          {% set p = states('sensor.p1_fazis_teljesitmeny_l2') | float(none) %}
+          {% set u = states('sensor.p1_feszultseg_l2') | float(none) %}
+          {% set i = states('sensor.p1_aram_l2') | float(none) %}
+          {% if p is none or u is none or i is none %}
+            unavailable
+          {% else %}
+            {% set s = u * (i | abs) %}
+            {% if s < 1 %}
+              unavailable
+            {% else %}
+              {% set pf = (p | abs) / s %}
+              {{ pf | round(3) if pf <= 1.2 else 'unavailable' }}
+            {% endif %}
+          {% endif %}
+
+      - name: "P1 teljesítménytényező L3"
+        unique_id: p1_teljesitmenytenyezo_l3
+        device_class: power_factor
+        state_class: measurement
+        state: >
+          {% set p = states('sensor.p1_fazis_teljesitmeny_l3') | float(none) %}
+          {% set u = states('sensor.p1_feszultseg_l3') | float(none) %}
+          {% set i = states('sensor.p1_aram_l3') | float(none) %}
+          {% if p is none or u is none or i is none %}
+            unavailable
+          {% else %}
+            {% set s = u * (i | abs) %}
+            {% if s < 1 %}
+              unavailable
+            {% else %}
+              {% set pf = (p | abs) / s %}
+              {{ pf | round(3) if pf <= 1.2 else 'unavailable' }}
+            {% endif %}
+          {% endif %}
+
+
+# ==============================================================
+# PADLÓFŰTÉS – ABLAKNYITÁS FIGYELÉS
+#
+# Az automatizmus az előző 5 perces hőmérsékletet ezekben tárolja.
+# 1 °C vagy nagyobb esés esetén ablaknyitást feltételez.
+# ==============================================================
+
+input_number:
+
+  padlofutes_elotte_konyha:
+    name: Alaphelyzet hőfok - Konyha
+    min: 0
+    max: 40
+    step: 0.1
+    mode: box
+    unit_of_measurement: "°C"
+  
+  padlofutes_elotte_haloszoba:
+    name: Alaphelyzet hőfok - Hálószoba
+    min: 0
+    max: 40
+    step: 0.1
+    mode: box
+    unit_of_measurement: "°C"
+  
+  padlofutes_elotte_furdoszoba:
+    name: Alaphelyzet hőfok - Fürdőszoba
+    min: 0
+    max: 40
+    step: 0.1
+    mode: box
+    unit_of_measurement: "°C"
+  
+  padlofutes_elotte_nappali:
+    name: Alaphelyzet hőfok - Nappali
+    min: 0
+    max: 40
+    step: 0.1
+    mode: box
+    unit_of_measurement: "°C"
+
+  padlofutes_elotte_dolgozo_emelet:
+    name: Padlófűtés előző Dolgozó Emelet hőmérséklet
+    min: 0
+    max: 40
+    step: 0.1
+    mode: box
+    unit_of_measurement: "°C"
+
+  padlofutes_elotte_furdoszoba_emelet:
+    name: Padlófűtés előző Fürdőszoba Emelet hőmérséklet
+    min: 0
+    max: 40
+    step: 0.1
+    mode: box
+    unit_of_measurement: "°C"
+
+  padlofutes_elotte_haloszoba_emelet:
+    name: Padlófűtés előző Hálószoba Emelet hőmérséklet
+    min: 0
+    max: 40
+    step: 0.1
+    mode: box
+    unit_of_measurement: "°C"
+  
+  padlofutes_elotte_nappali_emelet:
+    name: Padlófűtés előző Nappali Emelet hőmérséklet
+    min: 0
+    max: 40
+    step: 0.1
+    mode: box
+    unit_of_measurement: "°C"
+
+# ==============================================================
+# PADLÓFŰTÉS – ABLAKNYITÁS 5 PERCES IDŐZÍTŐK
+# ==============================================================
+
+timer:
+
+  padlofutes_ablak_konyha:
+    name: Padlófűtés ablak Konyha
+    duration: "00:05:00"
+
+  padlofutes_ablak_haloszoba:
+    name: Padlófűtés ablak Hálószoba
+    duration: "00:05:00"
+
+  padlofutes_ablak_furdoszoba:
+    name: Padlófűtés ablak Fürdőszoba
+    duration: "00:05:00"
+
+  padlofutes_ablak_nappali:
+    name: Padlófűtés ablak Nappali
+    duration: "00:05:00"
+
+  padlofutes_ablak_dolgozo_emelet:
+    name: Padlófűtés ablak Dolgozó Emelet
+    duration: "00:05:00"
+
+  padlofutes_ablak_furdoszoba_emelet:
+    name: Padlófűtés ablak Fürdőszoba Emelet
+    duration: "00:05:00"
+
+  padlofutes_ablak_haloszoba_emelet:
+    name: Padlófűtés ablak Hálószoba Emelet
+    duration: "00:05:00"
+
+  padlofutes_ablak_nappali_emelet:
+    name: Padlófűtés ablak Nappali Emelet
+    duration: "00:05:00"
+
+shell_command:
+  obk5506cdd6_jelenlet_log: >-
+    /bin/sh -c 'printf "%s | %s\n"
+    "$(date "+%Y-%m-%d %H:%M:%S")"
+    "{{ states("binary_sensor.obk5506cdd6_jelenlet") == "on"
+    and "ELÉRHETŐ" or "NEM ELÉRHETŐ" }}"
+    >> /config/obk5506cdd6_jelenlet.log'
+
+  obk55b72bca_jelenlet_log: >-
+    /bin/sh -c 'printf "%s | %s\n"
+    "$(date "+%Y-%m-%d %H:%M:%S")"
+    "{{ states("binary_sensor.obk55b72bca_jelenlet") == "on"
+    and "ELÉRHETŐ" or "NEM ELÉRHETŐ" }}"
+    >> /config/obk55b72bca_jelenlet.log'
